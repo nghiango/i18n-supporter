@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import {ActivatedRoute, Router, Routes} from '@angular/router';
 
 @Component({
   selector: 'json-dash-board',
@@ -7,9 +8,13 @@ import { Component, OnInit } from '@angular/core';
 })
 export class DashBoardComponent implements OnInit {
 
-  constructor() { }
+  constructor(private route: Router,
+              private activatedRoute: ActivatedRoute) { }
 
   ngOnInit() {
   }
 
+  navigateTo(replaceJson: string) {
+    this.route.navigate(['dashboard/json-replace']);
+  }
 }
