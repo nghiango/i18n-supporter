@@ -11,13 +11,9 @@ const routes: Routes = [
     ]},
 ];
 @NgModule({
-  declarations: [
-    DashBoardComponent,
-    SquareComponent,
-    JsonReplaceComponent
-  ],
   imports: [
     RouterModule.forChild(routes)
-  ]
+  ],
+  exports: [RouterModule]
 })
 export class DashBoardRoutingModule { }
