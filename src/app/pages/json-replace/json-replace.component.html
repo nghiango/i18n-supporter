@@ -1,7 +1,12 @@
-<div class="json-replace">
+<div class="json-replace main-form">
   <div class="row">
     <div class="col-5">
-      <input type="file"
+
+      <label for="file" class="btn-upload">
+        Upload
+      </label>
+
+      <input type="file" class="hidden"
              id="file"
              (change)="handleFileInput($event.target.files, originalFileContent)"
       placeholder="Choose File">
@@ -10,25 +15,37 @@
                   [readOnly]="originalFileContent.isDisabled"
                   cdkTextareaAutosize
                   #autosize="cdkTextareaAutosize"
-                  cdkAutosizeMinRows="5"
+                  cdkAutosizeMinRows="10"
                   cdkAutosizeMaxRows="10000"
                   [formControl]="originalFileContent.formControl"></textarea>
       </mat-form-field>
     </div>
-    <div class="col-2">
-      <button mat-raised-button>Compare</button>
+    <div class="col-2 json-replace__functions">
+      <button mat-raised-button class="btn-function"
+              matTooltip="Replace value of original by the new one"
+              (click)="replaceValue()">
+        Replace
+      </button>
+      <button mat-raised-button *ngIf="fileResult">
+        Download
+      </button>
     </div>
     <div class="col-5">
-      <input type="file"
-             id="fileNew"
-             (change)="handleFileInput($event.target.files, newFileContent)"
-             placeholder="Choose File">
+
+      <label for="fileNew" class="btn-upload">
+        Upload
+      </label>
+        <input type="file" class="hidden"
+               id="fileNew"
+               (change)="handleFileInput($event.target.files, newFileContent)"
+        >
+
       <mat-form-field style="width: 100%">
         <textarea matInput
                   [readOnly]="newFileContent.isDisabled"
                   cdkTextareaAutosize
                   #autosize="cdkTextareaAutosize"
-                  cdkAutosizeMinRows="5"
+                  cdkAutosizeMinRows="10"
                   cdkAutosizeMaxRows="10000"
                   [formControl]="newFileContent.formControl"></textarea>
       </mat-form-field>
