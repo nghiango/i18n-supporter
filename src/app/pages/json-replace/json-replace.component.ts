@@ -50,7 +50,7 @@ export class JsonReplaceComponent implements OnInit {
     fileReader.readAsText(this.fileToUpload);
   }
 
-  replaceValue() {
+  public replaceValue() {
     if (isNullOrUndefined(this.originalFileContent.formControl.value)) {
       alert('Please add content for original File');
       return;
@@ -59,7 +59,58 @@ export class JsonReplaceComponent implements OnInit {
       alert('Please add content for new File');
       return;
     }
-    // TODO: After replace value should build a file and show button download
+    const originalDictionary = {};
+    this.buildDictionary(this.originalFileContent.jsonValue, '', originalDictionary);
+    const newDictionary = {};
+    this.buildDictionary(this.newFileContent.jsonValue, '', newDictionary);
+    const replacedDictionary = this.replaceValueDictionary(originalDictionary, newDictionary);
+    // console.log(replacedDictionary);
+    this.buildJson(replacedDictionary);
 
+  }
+
+  private buildDictionary(jsonData, prefix, jsonValueMap) {
+    const temp = prefix;
+    const jsonDataKeys = Object.keys(jsonData);
+    for (let i = 0; i < jsonDataKeys.length; i ++) {
+      if (typeof jsonData !== 'string') {
+        prefix += jsonDataKeys[i] + '.';
+        this.buildDictionary(jsonData[jsonDataKeys[i]], prefix, jsonValueMap);
+        prefix = temp;
+      } else {
+        const newPrefix = prefix.substr(0, prefix.length - 1);
+        jsonValueMap[newPrefix] = jsonData;
+        break;
+      }
+    }
+  }
+
+  private replaceValueDictionary(originalDictionary: {}, newDictionary: {}) {
+    Object.keys(newDictionary).forEach(key => {
+      if (key in originalDictionary) {
+        originalDictionary[key] = newDictionary[key];
+      }
+    });
+    return originalDictionary;
+  }
+
+  private buildJson(dictionary: {}) {
+    const newDictionary = {};
+    Object.keys(dictionary).forEach(key => {
+      const keyArr = key.split('.');
+      this.buildNestedNode(keyArr, newDictionary, dictionary[key], 0);
+    });
+    console.log(newDictionary);
+  }
+
+  private buildNestedNode(keyArr: string[], newDictionary: {}, value: any, index: number) {
+    if (index === (keyArr.length - 1)) {
+      newDictionary[keyArr[index]] = value;
+      return;
+    }
+    if (!(keyArr[index] in newDictionary)) {
+      newDictionary[keyArr[index]] = {};
+    }
+    this.buildNestedNode(keyArr, newDictionary[keyArr[index]], value, index + 1);
   }
 }

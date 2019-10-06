@@ -14,7 +14,6 @@ export class DashBoardComponent implements OnInit {
               private activatedRoute: ActivatedRoute) { }
 
   ngOnInit() {
-    console.log(SquareBackGroundColorEnum.PINK_BACKGROUND);
     this.squares.push(new Square('Replace', 'Replace old value from original file by the new one',
       'assets/images/icon-edit.png', SquareBackGroundColorEnum.BLUE_BACKGROUND, 'json-replace'));
     this.squares.push(new Square('Tree', 'Show cms as tree to edit',
