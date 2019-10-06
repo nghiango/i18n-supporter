@@ -1,24 +1,33 @@
 <div class="json-replace main-form">
   <div class="row">
     <div class="col-5">
+      <div class="json-replace__header">
+        Original File
+      </div>
+      <div class="json-replace__content">
+        <button mat-raised-button class="btn-function"
+                matTooltip="Upload a file"
+                (click)="originalFile.click()">
+          Upload
+        </button>
 
-      <label for="file" class="btn-upload">
-        Upload
-      </label>
-
-      <input type="file" class="hidden"
-             id="file"
-             (change)="handleFileInput($event.target.files, originalFileContent)"
-      placeholder="Choose File">
-      <mat-form-field style="width: 100%">
+        <input type="file" class="hidden" #originalFile
+               id="file"
+               (change)="handleFileInput($event, originalFileContent)"
+               placeholder="Choose File">
+        <mat-form-field style="width: 100%">
         <textarea matInput
                   [readOnly]="originalFileContent.isDisabled"
                   cdkTextareaAutosize
                   #autosize="cdkTextareaAutosize"
                   cdkAutosizeMinRows="10"
                   cdkAutosizeMaxRows="10000"
-                  [formControl]="originalFileContent.formControl"></textarea>
-      </mat-form-field>
+                  [formControl]="originalFileContent.formControl">
+
+        </textarea>
+        </mat-form-field>
+      </div>
+
     </div>
     <div class="col-2 json-replace__functions">
       <button mat-raised-button class="btn-function"
@@ -31,16 +40,22 @@
       </button>
     </div>
     <div class="col-5">
+      <div class="json-replace__header">
+        New file
+      </div>
+      <div class="json-replace__content">
+        <button mat-raised-button class="btn-function"
+                matTooltip="Upload a file"
+                (click)="fileNew.click()">
+          Upload
+        </button>
 
-      <label for="fileNew" class="btn-upload">
-        Upload
-      </label>
-        <input type="file" class="hidden"
+        <input type="file" class="hidden" #fileNew
                id="fileNew"
-               (change)="handleFileInput($event.target.files, newFileContent)"
+               (change)="handleFileInput($event, newFileContent)"
         >
 
-      <mat-form-field style="width: 100%">
+        <mat-form-field style="width: 100%">
         <textarea matInput
                   [readOnly]="newFileContent.isDisabled"
                   cdkTextareaAutosize
@@ -48,7 +63,27 @@
                   cdkAutosizeMinRows="10"
                   cdkAutosizeMaxRows="10000"
                   [formControl]="newFileContent.formControl"></textarea>
-      </mat-form-field>
+        </mat-form-field>
+      </div>
+
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-12">
+      <div class="json-replace__header">
+        Result
+      </div>
+      <div class="json-replace__content">
+        <mat-form-field class="json-replace__result">
+        <textarea matInput
+                  [readOnly]="resultContent.isDisabled"
+                  cdkTextareaAutosize
+                  #autosize="cdkTextareaAutosize"
+                  cdkAutosizeMinRows="10"
+                  cdkAutosizeMaxRows="10000"
+                  [formControl]="resultContent.formControl"></textarea>
+        </mat-form-field>
+      </div>
     </div>
   </div>
 </div>

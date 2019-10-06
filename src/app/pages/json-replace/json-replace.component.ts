@@ -23,6 +23,7 @@ export class JsonReplaceComponent implements OnInit {
 
   public originalFileContent = new TextAreaFileContent(new FormControl(), false);
   public newFileContent = new TextAreaFileContent(new FormControl(), false);
+  public resultContent = new TextAreaFileContent(new FormControl(), false);
 
   @ViewChild('autosize') autosize: CdkTextareaAutosize;
   fileResult: boolean;
@@ -32,8 +33,8 @@ export class JsonReplaceComponent implements OnInit {
 
   ngOnInit() {}
 
-  handleFileInput(files: FileList, textAreaContent: TextAreaFileContent) {
-    this.fileToUpload = files.item(0);
+  handleFileInput(event, textAreaContent: TextAreaFileContent) {
+    this.fileToUpload = event.target.files[0];
     const fileReader = new FileReader();
     fileReader.onload = (e) => {
       if (typeof fileReader.result === 'string') {
@@ -46,7 +47,8 @@ export class JsonReplaceComponent implements OnInit {
         textAreaContent.formControl.setValue(fileReader.result);
         textAreaContent.isDisabled = true;
       }
-    }
+      event.target.value = '';
+    };
     fileReader.readAsText(this.fileToUpload);
   }
 
@@ -64,9 +66,8 @@ export class JsonReplaceComponent implements OnInit {
     const newDictionary = {};
     this.buildDictionary(this.newFileContent.jsonValue, '', newDictionary);
     const replacedDictionary = this.replaceValueDictionary(originalDictionary, newDictionary);
-    // console.log(replacedDictionary);
-    this.buildJson(replacedDictionary);
-
+    const nestedJsonContent = this.buildJson(replacedDictionary);
+    this.resultContent.formControl.setValue(JSON.stringify(nestedJsonContent, null, 4));
   }
 
   private buildDictionary(jsonData, prefix, jsonValueMap) {
@@ -100,7 +101,7 @@ export class JsonReplaceComponent implements OnInit {
       const keyArr = key.split('.');
       this.buildNestedNode(keyArr, newDictionary, dictionary[key], 0);
     });
-    console.log(newDictionary);
+    return newDictionary;
   }
 
   private buildNestedNode(keyArr: string[], newDictionary: {}, value: any, index: number) {
