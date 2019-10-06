@@ -38,12 +38,7 @@ export class JsonReplaceComponent implements OnInit {
     const fileReader = new FileReader();
     fileReader.onload = (e) => {
       if (typeof fileReader.result === 'string') {
-        try {
-          textAreaContent.jsonValue = JSON.parse(fileReader.result);
-        } catch (e) {
-          alert('Can\'t parse this file to Json');
-          return;
-        }
+        this.parseToJson(textAreaContent, fileReader.result);
         textAreaContent.formControl.setValue(fileReader.result);
         textAreaContent.isDisabled = true;
       }
@@ -52,14 +47,31 @@ export class JsonReplaceComponent implements OnInit {
     fileReader.readAsText(this.fileToUpload);
   }
 
+  private parseToJson(textAreaContent: TextAreaFileContent, fileReaderResult) {
+    try {
+      if (fileReaderResult) {
+        textAreaContent.jsonValue = JSON.parse(fileReaderResult);
+      } else {
+        textAreaContent.jsonValue = JSON.parse(textAreaContent.formControl.value);
+      }
+    } catch (e) {
+      alert('Can\'t parse this file to Json');
+      return;
+    }
+  }
+
   public replaceValue() {
     if (isNullOrUndefined(this.originalFileContent.formControl.value)) {
       alert('Please add content for original File');
       return;
+    } else {
+      this.parseToJson(this.originalFileContent, null);
     }
     if (isNullOrUndefined(this.newFileContent.formControl.value)) {
       alert('Please add content for new File');
       return;
+    } else {
+      this.parseToJson(this.newFileContent, null);
     }
     const originalDictionary = {};
     this.buildDictionary(this.originalFileContent.jsonValue, '', originalDictionary);
