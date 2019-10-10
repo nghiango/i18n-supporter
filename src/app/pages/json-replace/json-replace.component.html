@@ -2,27 +2,27 @@
   <div class="row">
     <div class="col-5">
       <div class="json-replace__header">
-        Original File
+        File 1
       </div>
       <div class="json-replace__content">
         <button mat-raised-button class="btn-function"
                 matTooltip="Upload a file"
-                (click)="originalFile.click()">
+                (click)="fileOne.click()">
           Upload
         </button>
 
-        <input type="file" class="hidden" #originalFile
+        <input type="file" class="hidden" #fileOne
                id="file"
-               (change)="handleFileInput($event, originalFileContent)"
+               (change)="handleFileInput($event, firstFileContent)"
                placeholder="Choose File">
         <mat-form-field style="width: 100%">
         <textarea matInput
-                  [readOnly]="originalFileContent.isDisabled"
+                  [readOnly]="firstFileContent.isDisabled"
                   cdkTextareaAutosize
                   #autosize="cdkTextareaAutosize"
                   cdkAutosizeMinRows="10"
                   cdkAutosizeMaxRows="10000"
-                  [formControl]="originalFileContent.formControl">
+                  [formControl]="firstFileContent.formControl">
 
         </textarea>
         </mat-form-field>
@@ -30,48 +30,69 @@
 
     </div>
     <div class="col-2 json-replace__functions">
-      <button mat-raised-button class="btn-function"
-              matTooltip="Replace value of original by the new one"
-              (click)="replaceValue()">
-        Replace
+      <button mat-raised-button color="primary" class="json-replace__btn-replace"
+              matTooltip="Replace value of file 1 by file 2"
+              (click)="replaceValue(firstFileContent, secondFileContent)">
+        File 1 <- File 2
       </button>
-      <button mat-raised-button *ngIf="fileResult">
-        Download
+      <button mat-raised-button color="primary" class="json-replace__btn-replace"
+              matTooltip="Replace value of file 2 by file 1"
+              (click)="replaceValue(secondFileContent, firstFileContent)">
+        File 1 -> File 2
       </button>
     </div>
     <div class="col-5">
       <div class="json-replace__header">
-        New file
+        File 2
       </div>
       <div class="json-replace__content">
         <button mat-raised-button class="btn-function"
                 matTooltip="Upload a file"
-                (click)="fileNew.click()">
+                (click)="fileTwo.click()">
           Upload
         </button>
 
-        <input type="file" class="hidden" #fileNew
+        <input type="file" class="hidden" #fileTwo
                id="fileNew"
-               (change)="handleFileInput($event, newFileContent)"
+               (change)="handleFileInput($event, secondFileContent)"
         >
 
         <mat-form-field style="width: 100%">
         <textarea matInput
-                  [readOnly]="newFileContent.isDisabled"
+                  [readOnly]="secondFileContent.isDisabled"
                   cdkTextareaAutosize
                   #autosize="cdkTextareaAutosize"
                   cdkAutosizeMinRows="10"
                   cdkAutosizeMaxRows="10000"
-                  [formControl]="newFileContent.formControl"></textarea>
+                  [formControl]="secondFileContent.formControl"></textarea>
         </mat-form-field>
       </div>
 
     </div>
   </div>
   <div class="row">
-    <div class="col-12">
+    <div class="col-6">
+      <div class="json-replace__header">
+        Original File
+      </div>
+      <div class="json-replace__content">
+        <mat-form-field class="json-replace__result">
+        <textarea matInput
+                  [readOnly]="originalFileContent.isDisabled"
+                  cdkTextareaAutosize
+                  #autosize="cdkTextareaAutosize"
+                  cdkAutosizeMinRows="10"
+                  cdkAutosizeMaxRows="10000"
+                  [formControl]="originalFileContent.formControl"></textarea>
+        </mat-form-field>
+      </div>
+    </div>
+    <div class="col-6">
       <div class="json-replace__header">
         Result
+        <button mat-raised-button *ngIf="fileResult">
+          Download
+        </button>
       </div>
       <div class="json-replace__content">
         <mat-form-field class="json-replace__result">

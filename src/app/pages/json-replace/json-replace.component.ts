@@ -21,9 +21,10 @@ class TextAreaFileContent {
 export class JsonReplaceComponent implements OnInit {
   private fileToUpload: File = null;
 
-  public originalFileContent = new TextAreaFileContent(new FormControl(), false);
-  public newFileContent = new TextAreaFileContent(new FormControl(), false);
+  public firstFileContent = new TextAreaFileContent(new FormControl(), false);
+  public secondFileContent = new TextAreaFileContent(new FormControl(), false);
   public resultContent = new TextAreaFileContent(new FormControl(), false);
+  public originalFileContent = new TextAreaFileContent(new FormControl(), false);
 
   @ViewChild('autosize') autosize: CdkTextareaAutosize;
   fileResult: boolean;
@@ -60,23 +61,24 @@ export class JsonReplaceComponent implements OnInit {
     }
   }
 
-  public replaceValue() {
-    if (isNullOrUndefined(this.originalFileContent.formControl.value)) {
+  public replaceValue(originalFileContent: TextAreaFileContent, newFileContent: TextAreaFileContent) {
+    this.originalFileContent.formControl.setValue(originalFileContent.formControl.value);
+    if (isNullOrUndefined(originalFileContent.formControl.value)) {
       alert('Please add content for original File');
       return;
     } else {
-      this.parseToJson(this.originalFileContent, null);
+      this.parseToJson(originalFileContent, null);
     }
-    if (isNullOrUndefined(this.newFileContent.formControl.value)) {
+    if (isNullOrUndefined(newFileContent.formControl.value)) {
       alert('Please add content for new File');
       return;
     } else {
-      this.parseToJson(this.newFileContent, null);
+      this.parseToJson(newFileContent, null);
     }
     const originalDictionary = {};
-    this.buildDictionary(this.originalFileContent.jsonValue, '', originalDictionary);
+    this.buildDictionary(originalFileContent.jsonValue, '', originalDictionary);
     const newDictionary = {};
-    this.buildDictionary(this.newFileContent.jsonValue, '', newDictionary);
+    this.buildDictionary(newFileContent.jsonValue, '', newDictionary);
     const replacedDictionary = this.replaceValueDictionary(originalDictionary, newDictionary);
     const nestedJsonContent = this.buildJson(replacedDictionary);
     this.resultContent.formControl.setValue(JSON.stringify(nestedJsonContent, null, 4));

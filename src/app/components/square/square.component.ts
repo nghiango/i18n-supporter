@@ -10,8 +10,6 @@ export class SquareComponent implements OnInit {
   @Input() square: Square;
   constructor() { }
 
-  ngOnInit() {
-    console.log(this.square.backgroundColor);
-  }
+  ngOnInit() {}
 
 }

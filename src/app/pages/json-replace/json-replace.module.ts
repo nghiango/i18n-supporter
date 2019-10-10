@@ -1,9 +1,8 @@
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import {JsonReplaceComponent} from './json-replace.component';
+import {NgModule} from '@angular/core';
+import {CommonModule} from '@angular/common';
 import {SharedModule} from '../../shared/shared.module';
 import {JsonReplaceRoutingModule} from './json-replace-routing.module';
-import {FileService} from '../../services/file.service';
+import {JsonReplaceComponent} from './json-replace.component';
 
 @NgModule({
   declarations: [
@@ -14,6 +13,5 @@ import {FileService} from '../../services/file.service';
     JsonReplaceRoutingModule,
     SharedModule
   ],
-  providers: [FileService],
 })
 export class JsonReplaceModule { }
