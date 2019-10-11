@@ -6,6 +6,7 @@ import {MatTreeNestedDataSource} from '@angular/material';
 interface JsonNode {
   name: string;
   children?: JsonNode[];
+  path?: string;
 }
 const TREE_DATA: JsonNode[] = [
   {
@@ -46,24 +47,34 @@ export class JsonTreeComponent implements OnInit {
     'components': {
       'duplicateOverlay': {
         'gender': 'Sesso',
-        'name': 'Nome Persona',
-        'birthdate': 'Data di nascita',
-        'address': 'Indirizzo',
-        'domicileCountry': 'Paese di origine',
-        'status': 'Stato test'
+      },
+      'test': {
+        'name': 'ha ha',
+        'child': {
+          'name': 'hu hu'
+        }
       }
     }
   };
   constructor() {
-    this.dataSource.data = TREE_DATA;
   }
 
   ngOnInit() {
-    this.buildTreeData(this.temp_data);
+    const treeData: JsonNode[] = [];
+    this.buildTreeData(this.temp_data, treeData);
+    this.dataSource.data = treeData;
   }
   hasChild = (_: number, node: JsonNode) => !!node.children && node.children.length > 0;
 
-  private buildTreeData(temp_data: Object) {
-    
+  private buildTreeData(resource: Object, treeData: JsonNode[]) {
+    const keys = Object.keys(resource);
+    if (keys.length > 0) {
+      keys.forEach(key => {
+        if (Object.keys(resource[key]).length > 0) {
+          treeData.push({name: key, children: []});
+        }
+      });
+    }
+    return treeData;
   }
 }
