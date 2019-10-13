@@ -3,11 +3,10 @@ import {ReactiveFormsModule} from '@angular/forms';
 import {MatButtonModule} from '@angular/material/button';
 import {MatInputModule} from '@angular/material/input';
 import {MatTooltipModule} from '@angular/material/tooltip';
-import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {CommonModule} from '@angular/common';
-import {JsonReplaceComponent} from '../pages/json-replace/json-replace.component';
 import {FileService} from '../services/file.service';
-import {MatIconModule, MatTreeModule} from '@angular/material';
+import {MatIconModule, MatSidenavModule, MatTreeModule} from '@angular/material';
+import {JsonService} from '../services/json.service';
 
 @NgModule({
   declarations: [],
@@ -25,8 +24,9 @@ import {MatIconModule, MatTreeModule} from '@angular/material';
     ReactiveFormsModule,
     MatTooltipModule,
     MatTreeModule,
-    MatIconModule
+    MatIconModule,
+    MatSidenavModule
   ],
-  providers: [FileService],
+  providers: [FileService, JsonService],
 })
 export class SharedModule { }

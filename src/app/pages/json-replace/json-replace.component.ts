@@ -3,6 +3,7 @@ import {FileService} from '../../services/file.service';
 import {FormControl} from '@angular/forms';
 import {CdkTextareaAutosize} from '@angular/cdk/text-field';
 import {isNullOrUndefined} from 'util';
+import {JsonService} from '../../services/json.service';
 
 class TextAreaFileContent {
   formControl: FormControl;
@@ -29,7 +30,8 @@ export class JsonReplaceComponent implements OnInit {
   @ViewChild('autosize') autosize: CdkTextareaAutosize;
   fileResult: boolean;
   constructor(
-    private fileService: FileService
+    private fileService: FileService,
+    private jsonService: JsonService
   ) { }
 
   ngOnInit() {}
@@ -75,29 +77,11 @@ export class JsonReplaceComponent implements OnInit {
     } else {
       this.parseToJson(newFileContent, null);
     }
-    const originalDictionary = {};
-    this.buildDictionary(originalFileContent.jsonValue, '', originalDictionary);
-    const newDictionary = {};
-    this.buildDictionary(newFileContent.jsonValue, '', newDictionary);
+    const originalDictionary = this.jsonService.buildDictionary(originalFileContent.jsonValue, '', {});
+    const newDictionary = this.jsonService.buildDictionary(newFileContent.jsonValue, '', {});
     const replacedDictionary = this.replaceValueDictionary(originalDictionary, newDictionary);
     const nestedJsonContent = this.buildJson(replacedDictionary);
     this.resultContent.formControl.setValue(JSON.stringify(nestedJsonContent, null, 4));
-  }
-
-  private buildDictionary(jsonData, prefix, jsonValueMap) {
-    const temp = prefix;
-    const jsonDataKeys = Object.keys(jsonData);
-    for (let i = 0; i < jsonDataKeys.length; i ++) {
-      if (typeof jsonData !== 'string') {
-        prefix += jsonDataKeys[i] + '.';
-        this.buildDictionary(jsonData[jsonDataKeys[i]], prefix, jsonValueMap);
-        prefix = temp;
-      } else {
-        const newPrefix = prefix.substr(0, prefix.length - 1);
-        jsonValueMap[newPrefix] = jsonData;
-        break;
-      }
-    }
   }
 
   private replaceValueDictionary(originalDictionary: {}, newDictionary: {}) {

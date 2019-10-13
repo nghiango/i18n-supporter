@@ -1,52 +1,36 @@
 import { Component, OnInit } from '@angular/core';
 import {NestedTreeControl} from '@angular/cdk/tree';
 import {MatTreeNestedDataSource} from '@angular/material';
+import {JsonNode} from '../../models/json-node';
+import {JsonService} from '../../services/json.service';
+import {FormControl} from '@angular/forms';
 
-
-interface JsonNode {
-  name: string;
-  children?: JsonNode[];
-  path?: string;
+interface FileDto {
+  fileName: string;
+  jsonDictionary: Object;
+  formControl: FormControl;
 }
-const TREE_DATA: JsonNode[] = [
-  {
-    name: 'Fruit',
-    children: [
-      {name: 'Apple'},
-      {name: 'Banana'},
-      {name: 'Fruit loops'},
-    ]
-  }, {
-    name: 'Vegetables',
-    children: [
-      {
-        name: 'Green',
-        children: [
-          {name: 'Broccoli'},
-          {name: 'Brussel sprouts'},
-        ]
-      }, {
-        name: 'Orange',
-        children: [
-          {name: 'Pumpkins'},
-          {name: 'Carrots'},
-        ]
-      },
-    ]
-  },
-];
 @Component({
   selector: 'json-json-tree',
   templateUrl: './json-tree.component.html',
   styleUrls: ['./json-tree.component.scss']
 })
 export class JsonTreeComponent implements OnInit {
+  public currentNode: JsonNode;
+  public files: FileDto[] = [];
   treeControl = new NestedTreeControl<JsonNode>(node => node.children);
   dataSource = new MatTreeNestedDataSource<JsonNode>();
   temp_data = {
     'components': {
       'duplicateOverlay': {
         'gender': 'Sesso',
+        'test': {
+          'child': {
+            'child2': {
+              'child3': 'something'
+            }
+          }
+        }
       },
       'test': {
         'name': 'ha ha',
@@ -56,25 +40,45 @@ export class JsonTreeComponent implements OnInit {
       }
     }
   };
-  constructor() {
-  }
+  constructor(
+    private jsonService: JsonService
+  ) {}
 
   ngOnInit() {
-    const treeData: JsonNode[] = [];
-    this.buildTreeData(this.temp_data, treeData);
+    let treeData: JsonNode[] = [];
+    treeData = this.jsonService.buildJsonNodes(this.temp_data, [], '');
     this.dataSource.data = treeData;
+    this.files.push(
+      {fileName: 'en.json', jsonDictionary: this.jsonService.buildDictionary(this.temp_data, '', {}), formControl: new FormControl()});
+    this.files.push(
+      {fileName: 'de.json', jsonDictionary: this.jsonService.buildDictionary(this.temp_data, '', {}), formControl: new FormControl()});
   }
   hasChild = (_: number, node: JsonNode) => !!node.children && node.children.length > 0;
 
-  private buildTreeData(resource: Object, treeData: JsonNode[]) {
-    const keys = Object.keys(resource);
-    if (keys.length > 0) {
-      keys.forEach(key => {
-        if (Object.keys(resource[key]).length > 0) {
-          treeData.push({name: key, children: []});
-        }
-      });
+  openNode(node: JsonNode) {
+    this.toggleNode(node);
+    this.currentNode = node;
+    this.updateValueFormControl(this.files, this.currentNode);
+  }
+
+  private toggleNode(node: JsonNode) {
+    if (this.currentNode) {
+      this.currentNode.selected = false;
     }
-    return treeData;
+    node.selected = true;
+  }
+
+  private updateValueFormControl(files: FileDto[], jsonNode: JsonNode) {
+    files.forEach(file => {
+      file.formControl.setValue(file.jsonDictionary[jsonNode.valueDic.path]);
+    });
+  }
+
+  updateValueForDictionary(file: FileDto) {
+    file.jsonDictionary[this.currentNode.valueDic.path] = file.formControl.value;
+  }
+
+  handleFileInput($event: Event) {
+
   }
 }
