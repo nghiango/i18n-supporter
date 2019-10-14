@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
+import {Square} from '../../ui-models/square';
 
 @Component({
   selector: 'json-square',
@@ -6,10 +7,9 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./square.component.scss']
 })
 export class SquareComponent implements OnInit {
-
+  @Input() square: Square;
   constructor() { }
 
-  ngOnInit() {
-  }
+  ngOnInit() {}
 
 }

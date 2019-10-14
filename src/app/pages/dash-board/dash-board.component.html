@@ -1,4 +1,4 @@
-<div class="dash-board">
-  <json-square (click)="navigateTo('replaceJson')"></json-square>
+<div class="dash-board main-form">
+  <json-square *ngFor="let square of squares" [square]="square" (click)="navigateTo(square.pathNavigate)"></json-square>
   <router-outlet></router-outlet>
 </div>

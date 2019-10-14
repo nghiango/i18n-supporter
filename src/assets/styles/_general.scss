@@ -12,3 +12,9 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 .orange-background {
   background: linear-gradient(to right, #fe9365, #feb798);
 }
+.hidden {
+  display: none;
+}
+.main-form {
+  padding: 40px;
+}

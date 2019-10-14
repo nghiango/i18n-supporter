@@ -1,0 +1,18 @@
+.json-replace {
+  &__functions {
+    display: flex;
+    flex-direction: column;
+  }
+  &__result {
+    width: 100%;
+  }
+  &__header {
+
+  }
+  &__content {
+
+  }
+  &__btn-replace {
+    margin-bottom: 10px;
+  }
+}
