@@ -8,4 +8,8 @@ export class AppPage {
   getTitleText() {
     return element(by.css('json-root h1')).getText();
   }
+
+  getSquare() {
+    return element.all(by.tagName('json-square'));
+  }
 }
