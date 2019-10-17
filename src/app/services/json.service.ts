@@ -70,4 +70,8 @@ export class JsonService {
       return;
     }
   }
+
+  public mergeKeys(currentJson: Object, newJson: Object) {
+    console.log('TODO: Oh my god');
+  }
 }
