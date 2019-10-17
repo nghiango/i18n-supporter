@@ -1,5 +1,17 @@
 <mat-sidenav-container class="example-container">
   <mat-sidenav mode="side" opened style="width: 20%">
+    <div class="json-tree__menu">
+      <button mat-flat-button color="primary" [matMenuTriggerFor]="menu">Menu</button>
+      <mat-menu #menu="matMenu">
+        <button mat-menu-item (click)="fileImport.click()">Import</button>
+        <button mat-menu-item>Export</button>
+      </mat-menu>
+
+      <input type="file" [hidden]="true" #fileImport
+             id="file"
+             (change)="handleFileInput($event)"
+             placeholder="Choose File">
+    </div>
     <mat-tree [dataSource]="dataSource" [treeControl]="treeControl" class="example-tree">
       <!-- This is the tree node template for leaf nodes -->
       <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle>
