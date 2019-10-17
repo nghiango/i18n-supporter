@@ -20,7 +20,7 @@ class TextAreaFileContent {
   styleUrls: ['./json-replace.component.scss']
 })
 export class JsonReplaceComponent implements OnInit {
-  private fileToUpload: File = null;
+  private file: File = null;
 
   public firstFileContent = new TextAreaFileContent(new FormControl(), false);
   public secondFileContent = new TextAreaFileContent(new FormControl(), false);
@@ -37,30 +37,11 @@ export class JsonReplaceComponent implements OnInit {
   ngOnInit() {}
 
   handleFileInput(event, textAreaContent: TextAreaFileContent) {
-    this.fileToUpload = event.target.files[0];
-    const fileReader = new FileReader();
-    fileReader.onload = (e) => {
-      if (typeof fileReader.result === 'string') {
-        this.parseToJson(textAreaContent, fileReader.result);
-        textAreaContent.formControl.setValue(fileReader.result);
-        textAreaContent.isDisabled = true;
-      }
+    this.file = event.target.files[0];
+    this.fileService.readContentOfFile(this.file).toPromise().then(content => {
+      textAreaContent.formControl.setValue(content);
       event.target.value = '';
-    };
-    fileReader.readAsText(this.fileToUpload);
-  }
-
-  private parseToJson(textAreaContent: TextAreaFileContent, fileReaderResult) {
-    try {
-      if (fileReaderResult) {
-        textAreaContent.jsonValue = JSON.parse(fileReaderResult);
-      } else {
-        textAreaContent.jsonValue = JSON.parse(textAreaContent.formControl.value);
-      }
-    } catch (e) {
-      alert('Can\'t parse this file to Json');
-      return;
-    }
+    });
   }
 
   public replaceValue(originalFileContent: TextAreaFileContent, newFileContent: TextAreaFileContent) {
@@ -69,13 +50,13 @@ export class JsonReplaceComponent implements OnInit {
       alert('Please add content for original File');
       return;
     } else {
-      this.parseToJson(originalFileContent, null);
+      originalFileContent.jsonValue = this.jsonService.parseToJson(originalFileContent.formControl.value);
     }
     if (isNullOrUndefined(newFileContent.formControl.value)) {
       alert('Please add content for new File');
       return;
     } else {
-      this.parseToJson(newFileContent, null);
+      newFileContent.jsonValue = this.jsonService.parseToJson(newFileContent.formControl.value);
     }
     const originalDictionary = this.jsonService.buildDictionary(originalFileContent.jsonValue, '', {});
     const newDictionary = this.jsonService.buildDictionary(newFileContent.jsonValue, '', {});

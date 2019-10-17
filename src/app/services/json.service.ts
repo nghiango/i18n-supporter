@@ -59,4 +59,15 @@ export class JsonService {
     }
     return treeData;
   }
+
+  public parseToJson(fileReaderResult) {
+    try {
+      if (fileReaderResult) {
+        return JSON.parse(fileReaderResult);
+      }
+    } catch (e) {
+      alert('Can\'t parse this file to Json');
+      return;
+    }
+  }
 }

@@ -4,12 +4,9 @@ import {MatTreeNestedDataSource} from '@angular/material';
 import {JsonNode} from '../../models/json-node';
 import {JsonService} from '../../services/json.service';
 import {FormControl} from '@angular/forms';
+import {FileService} from '../../services/file.service';
+import {FileDto} from '../../models/file-dto';
 
-interface FileDto {
-  fileName: string;
-  jsonDictionary: Object;
-  formControl: FormControl;
-}
 @Component({
   selector: 'json-json-tree',
   templateUrl: './json-tree.component.html',
@@ -41,7 +38,8 @@ export class JsonTreeComponent implements OnInit {
     }
   };
   constructor(
-    private jsonService: JsonService
+    private jsonService: JsonService,
+    private fileService: FileService
   ) {}
 
   ngOnInit() {
@@ -78,7 +76,15 @@ export class JsonTreeComponent implements OnInit {
     file.jsonDictionary[this.currentNode.valueDic.path] = file.formControl.value;
   }
 
-  handleFileInput($event: Event) {
-
+  handleFileInput($event) {
+    const fileImports: File[] = Array.from($event.target.files);
+    fileImports.forEach(file => {
+      this.fileService.readContentOfFile(file).toPromise().then(content => {
+        const jsonObject = this.jsonService.parseToJson(content);
+        const jsonDictionary = this.jsonService.buildDictionary(jsonObject, '', {});
+        const fileDto = new FileDto(file.name, jsonDictionary, new FormControl());
+        this.files.push(fileDto);
+      });
+    });
   }
 }

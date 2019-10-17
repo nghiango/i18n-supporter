@@ -10,7 +10,8 @@
       <input type="file" [hidden]="true" #fileImport
              id="file"
              (change)="handleFileInput($event)"
-             placeholder="Choose File">
+             placeholder="Choose File"
+             multiple>
     </div>
     <mat-tree [dataSource]="dataSource" [treeControl]="treeControl" class="example-tree">
       <!-- This is the tree node template for leaf nodes -->
