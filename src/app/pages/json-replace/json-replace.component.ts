@@ -60,37 +60,8 @@ export class JsonReplaceComponent implements OnInit {
     }
     const originalDictionary = this.jsonService.buildDictionary(originalFileContent.jsonValue, '', {});
     const newDictionary = this.jsonService.buildDictionary(newFileContent.jsonValue, '', {});
-    const replacedDictionary = this.replaceValueDictionary(originalDictionary, newDictionary);
-    const nestedJsonContent = this.buildJson(replacedDictionary);
-    this.resultContent.formControl.setValue(JSON.stringify(nestedJsonContent, null, 4));
-  }
-
-  private replaceValueDictionary(originalDictionary: {}, newDictionary: {}) {
-    Object.keys(newDictionary).forEach(key => {
-      if (key in originalDictionary) {
-        originalDictionary[key] = newDictionary[key];
-      }
-    });
-    return originalDictionary;
-  }
-
-  private buildJson(dictionary: {}) {
-    const newDictionary = {};
-    Object.keys(dictionary).forEach(key => {
-      const keyArr = key.split('.');
-      this.buildNestedNode(keyArr, newDictionary, dictionary[key], 0);
-    });
-    return newDictionary;
-  }
-
-  private buildNestedNode(keyArr: string[], newDictionary: {}, value: any, index: number) {
-    if (index === (keyArr.length - 1)) {
-      newDictionary[keyArr[index]] = value;
-      return;
-    }
-    if (!(keyArr[index] in newDictionary)) {
-      newDictionary[keyArr[index]] = {};
-    }
-    this.buildNestedNode(keyArr, newDictionary[keyArr[index]], value, index + 1);
+    const replacedDictionary = this.jsonService.replaceValueDictionary(originalDictionary, newDictionary);
+    const nestedJsonContent = this.jsonService.buildJson(replacedDictionary);
+    this.resultContent.formControl.setValue(this.jsonService.formatJsonString(nestedJsonContent));
   }
 }

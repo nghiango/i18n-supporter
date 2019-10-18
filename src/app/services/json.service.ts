@@ -43,23 +43,6 @@ export class JsonService {
     return jsonDictionary;
   }
 
-  private buildTreeData(resource: Object, treeData: JsonNode[]) {
-    const keys = Object.keys(resource);
-    if (keys.length > 0) {
-      for (let i = 0; i < keys.length; i++) {
-        if (typeof resource[keys[i]] !== 'string') {
-          if (Object.keys(resource[keys[i]]).length > 0) {
-            treeData.push({name: keys[i], children: this.buildTreeData(resource[keys[i]], [])});
-          }
-        } else {
-          treeData.push({name: keys[i]});
-          break;
-        }
-      }
-    }
-    return treeData;
-  }
-
   public parseToJson(fileReaderResult) {
     try {
       if (fileReaderResult) {
@@ -71,7 +54,45 @@ export class JsonService {
     }
   }
 
-  public mergeKeys(currentJson: Object, newJson: Object) {
-    console.log('TODO: Oh my god');
+  public buildJson(dictionary: {}) {
+    const newDictionary = {};
+    Object.keys(dictionary).forEach(key => {
+      const keyArr = key.split('.');
+      this.buildNestedNode(keyArr, newDictionary, dictionary[key], 0);
+    });
+    return newDictionary;
+  }
+
+  public buildNestedNode(keyArr: string[], newDictionary: {}, value: any, index: number) {
+    if (index === (keyArr.length - 1)) {
+      newDictionary[keyArr[index]] = value;
+      return;
+    }
+    if (!(keyArr[index] in newDictionary)) {
+      newDictionary[keyArr[index]] = {};
+    }
+    this.buildNestedNode(keyArr, newDictionary[keyArr[index]], value, index + 1);
+  }
+
+  public replaceValueDictionary(originalDictionary: {}, newDictionary: {}) {
+    Object.keys(newDictionary).forEach(key => {
+      if (key in originalDictionary) {
+        originalDictionary[key] = newDictionary[key];
+      }
+    });
+    return originalDictionary;
+  }
+
+  public formatJsonString(nestedJsonContent: {})  {
+    return JSON.stringify(nestedJsonContent, null, 4);
+  }
+
+  public mergeKeys(currentJsonDictionary: Object, newJsonDictionary: Object) {
+    Object.keys(newJsonDictionary).forEach(key => {
+      if (!(key in currentJsonDictionary)) {
+        currentJsonDictionary[key] = '';
+      }
+    });
+    return currentJsonDictionary;
   }
 }

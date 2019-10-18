@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {NestedTreeControl} from '@angular/cdk/tree';
 import {MatTreeNestedDataSource} from '@angular/material';
 import {JsonNode} from '../../models/json-node';
@@ -6,6 +6,7 @@ import {JsonService} from '../../services/json.service';
 import {FormControl} from '@angular/forms';
 import {FileService} from '../../services/file.service';
 import {FileDto} from '../../models/file-dto';
+import {isNullOrUndefined} from 'util';
 
 @Component({
   selector: 'json-json-tree',
@@ -15,42 +16,16 @@ import {FileDto} from '../../models/file-dto';
 export class JsonTreeComponent implements OnInit {
   public currentNode: JsonNode;
   public files: FileDto[] = [];
-  treeControl = new NestedTreeControl<JsonNode>(node => node.children);
-  dataSource = new MatTreeNestedDataSource<JsonNode>();
-  temp_data = {
-    'components': {
-      'duplicateOverlay': {
-        'gender': 'Sesso',
-        'test': {
-          'child': {
-            'child2': {
-              'child3': 'something'
-            }
-          }
-        }
-      },
-      'test': {
-        'name': 'ha ha',
-        'child': {
-          'name': 'hu hu'
-        }
-      }
-    }
-  };
+  public treeControl = new NestedTreeControl<JsonNode>(node => node.children);
+  public dataSource = new MatTreeNestedDataSource<JsonNode>();
+  private currentJsonDictionary: Object;
+  private currentNestedJson: Object;
   constructor(
     private jsonService: JsonService,
     private fileService: FileService
   ) {}
 
-  ngOnInit() {
-    let treeData: JsonNode[] = [];
-    treeData = this.jsonService.buildJsonNodes(this.temp_data, [], '');
-    this.dataSource.data = treeData;
-    this.files.push(
-      {fileName: 'en.json', jsonDictionary: this.jsonService.buildDictionary(this.temp_data, '', {}), formControl: new FormControl()});
-    this.files.push(
-      {fileName: 'de.json', jsonDictionary: this.jsonService.buildDictionary(this.temp_data, '', {}), formControl: new FormControl()});
-  }
+  ngOnInit() {}
   hasChild = (_: number, node: JsonNode) => !!node.children && node.children.length > 0;
 
   openNode(node: JsonNode) {
@@ -82,9 +57,22 @@ export class JsonTreeComponent implements OnInit {
       this.fileService.readContentOfFile(file).toPromise().then(content => {
         const jsonObject = this.jsonService.parseToJson(content);
         const jsonDictionary = this.jsonService.buildDictionary(jsonObject, '', {});
+        this.updateJsonTree(jsonObject, jsonDictionary);
         const fileDto = new FileDto(file.name, jsonDictionary, new FormControl());
         this.files.push(fileDto);
       });
     });
+  }
+
+  private updateJsonTree(jsonObject, jsonDictionary) {
+    if (isNullOrUndefined(this.currentNestedJson)) {
+      this.currentNestedJson = jsonObject;
+      this.currentJsonDictionary = jsonDictionary;
+    } else {
+      this.currentJsonDictionary = this.jsonService.mergeKeys(this.currentJsonDictionary, jsonDictionary);
+      this.currentNestedJson = this.jsonService.buildJson(this.currentJsonDictionary);
+    }
+    this.dataSource.data = [];
+    this.dataSource.data = this.jsonService.buildJsonNodes(this.currentNestedJson, [], '');
   }
 }
