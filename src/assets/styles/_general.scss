@@ -12,6 +12,34 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 .orange-background {
   background: linear-gradient(to right, #fe9365, #feb798);
 }
+
+.icon {
+  &__medium {
+    font-size: 40px;
+    width: 32px !important;
+    height: 32px !important;
+  }
+
+  &--green {
+    color: #00c20b;
+    > svg {
+      color: #00c20b;
+    }
+  }
+  &--red {
+    color: #c20004;
+    > svg {
+      color: #c20004;
+    }
+  }
+}
+
+.item {
+  &--clickable {
+    cursor: pointer;
+  }
+}
+
 .hidden {
   display: none;
 }

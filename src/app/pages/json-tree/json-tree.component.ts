@@ -43,12 +43,19 @@ export class JsonTreeComponent implements OnInit {
 
   private updateValueFormControl(files: FileDto[], jsonNode: JsonNode) {
     files.forEach(file => {
-      file.formControl.setValue(file.jsonDictionary[jsonNode.valueDic.path]);
+      file.formControl.setValue(file.jsonDictionary[jsonNode.path]);
+      if (!(jsonNode.path in file.jsonDictionary)) {
+        file.notExisted = true;
+        file.formControl.disable();
+      } else {
+        file.notExisted = false;
+        file.formControl.enable();
+      }
     });
   }
 
   updateValueForDictionary(file: FileDto) {
-    file.jsonDictionary[this.currentNode.valueDic.path] = file.formControl.value;
+    file.jsonDictionary[this.currentNode.path] = file.formControl.value;
   }
 
   handleFileInput($event) {
@@ -57,9 +64,9 @@ export class JsonTreeComponent implements OnInit {
       this.fileService.readContentOfFile(file).toPromise().then(content => {
         const jsonObject = this.jsonService.parseToJson(content);
         const jsonDictionary = this.jsonService.buildDictionary(jsonObject, '', {});
-        this.updateJsonTree(jsonObject, jsonDictionary);
         const fileDto = new FileDto(file.name, jsonDictionary, new FormControl());
         this.files.push(fileDto);
+        this.updateJsonTree(jsonObject, Object.assign({}, jsonDictionary));
       });
     });
   }
@@ -74,5 +81,11 @@ export class JsonTreeComponent implements OnInit {
     }
     this.dataSource.data = [];
     this.dataSource.data = this.jsonService.buildJsonNodes(this.currentNestedJson, [], '');
+  }
+
+  addKey(file: FileDto) {
+    file.jsonDictionary[this.currentNode.path] = '';
+    file.notExisted = false;
+    file.formControl.enable();
   }
 }

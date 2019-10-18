@@ -19,7 +19,7 @@ export class JsonService {
           }
         } else {
           const finalPath = path + keys[i];
-          jsonNodes.push({name: keys[i], children: null, valueDic: {path: finalPath, value: resource[keys[i]]}});
+          jsonNodes.push({name: keys[i], children: null, path: finalPath});
         }
       }
     }

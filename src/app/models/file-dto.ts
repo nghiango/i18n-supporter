@@ -4,6 +4,7 @@ export class FileDto {
   fileName: string;
   jsonDictionary: Object;
   formControl: FormControl;
+  notExisted: boolean;
 
   constructor(fileName: string, jsonDictionary: Object, formControl: FormControl) {
     this.fileName = fileName;
