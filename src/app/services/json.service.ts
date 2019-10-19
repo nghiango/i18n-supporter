@@ -6,7 +6,7 @@ export class JsonService {
 
   constructor() { }
 
-  public buildJsonNodes(resource: Object, jsonNodes: JsonNode[], path: string) {
+  public buildJsonNodes(resource: Object, jsonNodes: JsonNode[], path: string, parentNode: JsonNode = null) {
     const tempPath = path;
     const keys = Object.keys(resource);
     if (keys.length > 0) {
@@ -14,12 +14,15 @@ export class JsonService {
         if (typeof resource[keys[i]] !== 'string') {
           if (Object.keys(resource[keys[i]]).length > 0) {
             path += keys[i] + '.';
-            jsonNodes.push({name: keys[i], children: this.buildJsonNodes(resource[keys[i]], [],  path)});
+            const node = {name: keys[i], children: [], parent: parentNode};
+            node.children = this.buildJsonNodes(resource[keys[i]], [],  path, node);
+            jsonNodes.push(node);
             path = tempPath;
           }
         } else {
           const finalPath = path + keys[i];
-          jsonNodes.push({name: keys[i], children: null, path: finalPath});
+          jsonNodes.push({name: keys[i], children: null,
+            path: finalPath, parent: parentNode});
         }
       }
     }

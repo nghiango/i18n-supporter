@@ -3,4 +3,5 @@ export class JsonNode {
   children?: JsonNode[];
   path?: string;
   selected?: boolean;
+  parent?: JsonNode;
 }

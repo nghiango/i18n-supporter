@@ -20,6 +20,7 @@ export class JsonTreeComponent implements OnInit {
   public dataSource = new MatTreeNestedDataSource<JsonNode>();
   private currentJsonDictionary: Object;
   private currentNestedJson: Object;
+  public parentNode: JsonNode;
   constructor(
     private jsonService: JsonService,
     private fileService: FileService
@@ -66,12 +67,12 @@ export class JsonTreeComponent implements OnInit {
         const jsonDictionary = this.jsonService.buildDictionary(jsonObject, '', {});
         const fileDto = new FileDto(file.name, jsonDictionary, new FormControl());
         this.files.push(fileDto);
-        this.updateJsonTree(jsonObject, Object.assign({}, jsonDictionary));
+        this.initJsonTree(jsonObject, Object.assign({}, jsonDictionary));
       });
     });
   }
 
-  private updateJsonTree(jsonObject, jsonDictionary) {
+  private initJsonTree(jsonObject, jsonDictionary) {
     if (isNullOrUndefined(this.currentNestedJson)) {
       this.currentNestedJson = jsonObject;
       this.currentJsonDictionary = jsonDictionary;
@@ -79,13 +80,45 @@ export class JsonTreeComponent implements OnInit {
       this.currentJsonDictionary = this.jsonService.mergeKeys(this.currentJsonDictionary, jsonDictionary);
       this.currentNestedJson = this.jsonService.buildJson(this.currentJsonDictionary);
     }
-    this.dataSource.data = [];
-    this.dataSource.data = this.jsonService.buildJsonNodes(this.currentNestedJson, [], '');
+    this.updateJsonTreeData(this.currentNestedJson);
+  }
+
+  private updateJsonTreeData(nestedJson: Object) {
+    this.dataSource.data = null;
+    const data = this.jsonService.buildJsonNodes(nestedJson, [], '');
+    this.dataSource.data = data;
+    this.treeControl.dataNodes = data;
   }
 
   addKey(file: FileDto) {
     file.jsonDictionary[this.currentNode.path] = '';
     file.notExisted = false;
     file.formControl.enable();
+  }
+
+  removeKeyInFile(file: FileDto) {
+    delete file.jsonDictionary[this.currentNode.path];
+    file.notExisted = true;
+    file.formControl.disable();
+    file.formControl.setValue('');
+  }
+
+  removeKey() {
+    this.files.forEach(file => {
+      this.removeKeyInFile(file);
+    });
+    delete this.currentJsonDictionary[this.currentNode.path];
+    this.currentNestedJson = this.jsonService.buildJson(this.currentJsonDictionary);
+    this.updateJsonTreeData(this.currentNestedJson);
+    this.parentNode = this.currentNode.parent;
+    this.currentNode = null;
+    this.expandNode(this.parentNode);
+  }
+
+  public expandNode(node: JsonNode) {
+    if (node.parent) {
+      this.expandNode(node.parent);
+    }
+    this.treeControl.expand(node);
   }
 }

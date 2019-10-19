@@ -5,6 +5,7 @@
       <mat-menu #menu="matMenu">
         <button mat-menu-item (click)="fileImport.click()">Import</button>
         <button mat-menu-item>Export</button>
+        <button mat-menu-item (click)="expandNode(parentNode)">Expand</button>
       </mat-menu>
 
       <input type="file" [hidden]="true" #fileImport
@@ -18,7 +19,7 @@
       <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle>
         <li class="mat-tree-node">
           <!-- use a disabled button to provide padding for tree leaf -->
-          <a (click)="openNode(node)" [ngClass]="{'json-tree--node-active': node.selected}">
+          <a (click)="openNode(node)" class="item--clickable" [ngClass]="{'json-tree--node-active': node.selected}">
             {{node.name}}
           </a>
         </li>
@@ -33,7 +34,11 @@
                 {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
               </mat-icon>
             </button>
-            {{node.name}}
+            <div matTreeNodeToggle
+                 [attr.aria-label]="'toggle ' + node.name"
+                 class="item--clickable">
+              {{node.name}}
+            </div>
           </div>
           <ul [class.example-tree-invisible]="!treeControl.isExpanded(node)">
             <ng-container matTreeNodeOutlet></ng-container>
@@ -46,12 +51,17 @@
     <div class="json-tree__content" *ngIf="currentNode">
       <div class="json-tree__header">
         <h3>{{currentNode.name}}</h3>
-        <mat-icon class="icon__medium icon--red item--clickable">delete_forever</mat-icon>
+        <mat-icon class="icon__medium icon--red item--clickable"
+                  (click)="removeKey()">delete_forever</mat-icon>
       </div>
       <div *ngFor="let file of files">
         <div class="json-tree__row">
           <mat-icon *ngIf="file.notExisted"
-                    class="icon__medium icon--green item--clickable json-tree__add-icon" (click)="addKey(file)">add</mat-icon>
+                    class="icon__medium icon--green item--clickable json-tree__right-icon"
+                    (click)="addKey(file)">add</mat-icon>
+          <mat-icon *ngIf="!file.notExisted"
+                    class="icon__medium icon--red item--clickable json-tree__right-icon"
+                    (click)="removeKeyInFile(file)">delete_forever</mat-icon>
           <mat-form-field style="width: 100%">
             <mat-label>{{file.fileName}}</mat-label>
             <input matInput placeholder="Please fill value" [formControl]="file.formControl" (change)="updateValueForDictionary(file)">
