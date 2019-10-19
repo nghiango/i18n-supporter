@@ -16,6 +16,16 @@
     margin-left: 75%;
   }
 
+  &__header {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  &__right-icon {
+    float: right;
+    margin-right: 2%;
+  }
+
   &--node-active {
     color: #1b14ff !important;
   }
