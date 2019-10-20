@@ -91,7 +91,7 @@ export class JsonTreeComponent implements OnInit {
     this.treeControl.dataNodes = jsonNodes;
   }
 
-  addKey(file: FileDto) {
+  addKeyInFile(file: FileDto) {
     file.jsonDictionary[this.currentNode.path] = '';
     file.notExisted = false;
     file.formControl.enable();
@@ -104,11 +104,12 @@ export class JsonTreeComponent implements OnInit {
     file.formControl.setValue('');
   }
 
-  removeKey() {
+  removeKey(node: JsonNode) {
+    this.currentNode = node;
     this.files.forEach(file => {
       this.removeKeyInFile(file);
     });
-    this.currentJsonNodes = this.removeNode(this.currentNode, this.currentJsonNodes);
+    this.currentJsonNodes = this.removeNode(node, this.currentJsonNodes);
     this.updateJsonTreeData(this.currentJsonNodes);
     this.currentNode = null;
   }
@@ -123,5 +124,9 @@ export class JsonTreeComponent implements OnInit {
       }
     }
     return jsonNodes;
+  }
+
+  addKey(node: JsonNode) {
+    
   }
 }
