@@ -6,7 +6,7 @@ import {JsonService} from '../../services/json.service';
 import {FormControl} from '@angular/forms';
 import {FileService} from '../../services/file.service';
 import {FileDto} from '../../models/file-dto';
-import {isNullOrUndefined} from 'util';
+import {isNullOrUndefined, log} from 'util';
 
 @Component({
   selector: 'json-json-tree',
@@ -21,6 +21,7 @@ export class JsonTreeComponent implements OnInit {
   private currentJsonDictionary: Object;
   private currentNestedJson: Object;
   public parentNode: JsonNode;
+  private currentJsonNodes: JsonNode[];
   constructor(
     private jsonService: JsonService,
     private fileService: FileService
@@ -80,17 +81,17 @@ export class JsonTreeComponent implements OnInit {
       this.currentJsonDictionary = this.jsonService.mergeKeys(this.currentJsonDictionary, jsonDictionary);
       this.currentNestedJson = this.jsonService.buildJson(this.currentJsonDictionary);
     }
-    this.updateJsonTreeData(this.currentNestedJson);
+    this.currentJsonNodes = this.jsonService.buildJsonNodes(this.currentNestedJson, [], '');
+    this.updateJsonTreeData(this.currentJsonNodes);
   }
 
-  private updateJsonTreeData(nestedJson: Object) {
+  private updateJsonTreeData(jsonNodes: JsonNode[]) {
     this.dataSource.data = null;
-    const data = this.jsonService.buildJsonNodes(nestedJson, [], '');
-    this.dataSource.data = data;
-    this.treeControl.dataNodes = data;
+    this.dataSource.data = jsonNodes;
+    this.treeControl.dataNodes = jsonNodes;
   }
 
-  addKey(file: FileDto) {
+  addKeyInFile(file: FileDto) {
     file.jsonDictionary[this.currentNode.path] = '';
     file.notExisted = false;
     file.formControl.enable();
@@ -103,22 +104,29 @@ export class JsonTreeComponent implements OnInit {
     file.formControl.setValue('');
   }
 
-  removeKey() {
+  removeKey(node: JsonNode) {
+    this.currentNode = node;
     this.files.forEach(file => {
       this.removeKeyInFile(file);
     });
-    delete this.currentJsonDictionary[this.currentNode.path];
-    this.currentNestedJson = this.jsonService.buildJson(this.currentJsonDictionary);
-    this.updateJsonTreeData(this.currentNestedJson);
-    this.parentNode = this.currentNode.parent;
+    this.currentJsonNodes = this.removeNode(node, this.currentJsonNodes);
+    this.updateJsonTreeData(this.currentJsonNodes);
     this.currentNode = null;
-    this.expandNode(this.parentNode);
   }
 
-  public expandNode(node: JsonNode) {
-    if (node.parent) {
-      this.expandNode(node.parent);
+  private removeNode(node: JsonNode, jsonNodes: JsonNode[]): JsonNode[] {
+    for (let i = 0; i < jsonNodes.length; i++) {
+      if (jsonNodes[i].path === node.path) {
+        jsonNodes.splice(i, 1);
+        break;
+      } else if (jsonNodes[i].children) {
+        jsonNodes[i].children = this.removeNode(node, jsonNodes[i].children);
+      }
     }
-    this.treeControl.expand(node);
+    return jsonNodes;
+  }
+
+  addKey(node: JsonNode) {
+    
   }
 }

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+  import { Injectable } from '@angular/core';
 import {JsonNode} from '../models/json-node';
 
 @Injectable()
@@ -6,7 +6,7 @@ export class JsonService {
 
   constructor() { }
 
-  public buildJsonNodes(resource: Object, jsonNodes: JsonNode[], path: string, parentNode: JsonNode = null) {
+  public buildJsonNodes(resource: Object, jsonNodes: JsonNode[], path: string) {
     const tempPath = path;
     const keys = Object.keys(resource);
     if (keys.length > 0) {
@@ -14,15 +14,15 @@ export class JsonService {
         if (typeof resource[keys[i]] !== 'string') {
           if (Object.keys(resource[keys[i]]).length > 0) {
             path += keys[i] + '.';
-            const node = {name: keys[i], children: [], parent: parentNode};
-            node.children = this.buildJsonNodes(resource[keys[i]], [],  path, node);
+            const node = {name: keys[i], children: [], path: path, parentPath: tempPath};
+            node.children = this.buildJsonNodes(resource[keys[i]], [],  path);
             jsonNodes.push(node);
             path = tempPath;
           }
         } else {
           const finalPath = path + keys[i];
           jsonNodes.push({name: keys[i], children: null,
-            path: finalPath, parent: parentNode});
+            path: finalPath, parentPath: tempPath});
         }
       }
     }
