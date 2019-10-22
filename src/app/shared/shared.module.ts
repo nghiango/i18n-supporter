@@ -5,7 +5,7 @@ import {MatInputModule} from '@angular/material/input';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {CommonModule} from '@angular/common';
 import {FileService} from '../services/file.service';
-import {MatIconModule, MatMenuModule, MatSidenavModule, MatTreeModule} from '@angular/material';
+import {MatDialogModule, MatIconModule, MatMenuModule, MatSidenavModule, MatTreeModule} from '@angular/material';
 import {JsonService} from '../services/json.service';
 
 @NgModule({
@@ -26,7 +26,8 @@ import {JsonService} from '../services/json.service';
     MatTreeModule,
     MatIconModule,
     MatSidenavModule,
-    MatMenuModule
+    MatMenuModule,
+    MatDialogModule
   ],
   providers: [FileService, JsonService],
 })
