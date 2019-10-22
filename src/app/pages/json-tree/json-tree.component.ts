@@ -1,12 +1,13 @@
 import {Component, OnInit} from '@angular/core';
 import {NestedTreeControl} from '@angular/cdk/tree';
-import {MatTreeNestedDataSource} from '@angular/material';
+import {MatDialog, MatTreeNestedDataSource} from '@angular/material';
 import {JsonNode} from '../../models/json-node';
 import {JsonService} from '../../services/json.service';
 import {FormControl} from '@angular/forms';
 import {FileService} from '../../services/file.service';
 import {FileDto} from '../../models/file-dto';
 import {isNullOrUndefined, log} from 'util';
+import {AddKeyDialogComponent} from '../../components/add-key-dialog/add-key-dialog.component';
 
 @Component({
   selector: 'json-json-tree',
@@ -20,11 +21,11 @@ export class JsonTreeComponent implements OnInit {
   public dataSource = new MatTreeNestedDataSource<JsonNode>();
   private currentJsonDictionary: Object;
   private currentNestedJson: Object;
-  public parentNode: JsonNode;
   private currentJsonNodes: JsonNode[];
   constructor(
     private jsonService: JsonService,
-    private fileService: FileService
+    private fileService: FileService,
+    public dialog: MatDialog
   ) {}
 
   ngOnInit() {}
@@ -127,6 +128,11 @@ export class JsonTreeComponent implements OnInit {
   }
 
   addKey(node: JsonNode) {
-    
+    this.dialog.open(AddKeyDialogComponent, {
+      data: 'test'
+    }).afterClosed();
+    // node.children.push(new JsonNode());
+    // console.log(this.currentJsonNodes);
+    // this.updateJsonTreeData(this.currentJsonNodes);
   }
 }
