@@ -22,6 +22,7 @@ export class JsonTreeComponent implements OnInit {
   private currentJsonDictionary: Object;
   private currentNestedJson: Object;
   private currentJsonNodes: JsonNode[];
+  private editNumber = '';
   constructor(
     private jsonService: JsonService,
     private fileService: FileService,
@@ -136,7 +137,16 @@ export class JsonTreeComponent implements OnInit {
     // this.updateJsonTreeData(this.currentJsonNodes);
   }
 
-  renameKey(node: JsonNode) {
-    node.name = 'test';
+  enterEditMode(node: JsonNode) {
+    this.editNumber = Date.now().toString();
+    node.editingNumber = this.editNumber;
+  }
+
+  exitEditMode() {
+    this.editNumber = '';
+  }
+
+  updateKeyName(node) {
+    
   }
 }

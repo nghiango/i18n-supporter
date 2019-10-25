@@ -18,10 +18,16 @@
       <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle>
         <li class="mat-tree-node">
           <!-- use a disabled button to provide padding for tree leaf -->
-          <a (click)="openNode(node)" class="item--clickable" [ngClass]="{'json-tree--node-active': node.selected}">
-            {{node.name}}
-          </a>
-          <ng-container *ngTemplateOutlet="nodeMenuTemplate, context: {$implicit: node}"></ng-container>
+
+          <div *ngIf="node.editingNumber === editNumber" class="d-flex align-items-center">
+            <ng-container *ngTemplateOutlet="inputTemplate, context: {$implicit: node}"></ng-container>
+          </div>
+          <div *ngIf="node.editingNumber !== editNumber" class="d-flex">
+            <a (click)="openNode(node)" class="item--clickable" [ngClass]="{'json-tree--node-active': node.selected}">
+              {{node.name}}
+            </a>
+            <ng-container *ngTemplateOutlet="nodeMenuTemplate, context: {$implicit: node}"></ng-container>
+          </div>
         </li>
       </mat-tree-node>
       <!-- This is the tree node template for expandable nodes -->
@@ -34,12 +40,18 @@
                 {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
               </mat-icon>
             </button>
-            <div matTreeNodeToggle
-                 [attr.aria-label]="'toggle ' + node.name"
-                 class="item--clickable">
-              {{node.name}}
+            <div *ngIf="node.editingNumber  === editNumber" class="d-flex align-items-center">
+              <ng-container *ngTemplateOutlet="inputTemplate, context: {$implicit: node}"></ng-container>
             </div>
-            <ng-container *ngTemplateOutlet="nodeMenuTemplate, context: {$implicit: node}"></ng-container>
+            <div *ngIf="node.editingNumber  !== editNumber" class="d-flex">
+              <div matTreeNodeToggle
+                   [attr.aria-label]="'toggle ' + node.name"
+                   class="item--clickable">
+                {{node.name}}
+              </div>
+              <ng-container *ngTemplateOutlet="nodeMenuTemplate, context: {$implicit: node}"></ng-container>
+            </div>
+
           </div>
           <ul [class.example-tree-invisible]="!treeControl.isExpanded(node)">
             <ng-container matTreeNodeOutlet></ng-container>
@@ -78,7 +90,17 @@
   <mat-icon class="item--clickable" [matMenuTriggerFor]="menuNode">more_vert</mat-icon>
   <mat-menu #menuNode="matMenu">
     <button mat-menu-item (click)="addKey(node)">Add Key</button>
-    <button mat-menu-item (click)="renameKey(node)">Rename Key</button>
+    <button mat-menu-item (click)="enterEditMode(node)">Rename Key</button>
     <button mat-menu-item (click)="removeKey(node)">Remove Key</button>
   </mat-menu>
 </ng-template>
+
+<ng-template #inputTemplate let-node>
+  <mat-form-field style="width: 100%">
+    <input matInput placeholder="Please fill value">
+  </mat-form-field>
+  <mat-icon class="item--clickable icon--green" (click)="updateKeyName(node)">done</mat-icon>
+  <mat-icon class="item--clickable icon--red" (click)="exitEditMode()">close</mat-icon>
+</ng-template>
+
+

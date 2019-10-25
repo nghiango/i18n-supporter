@@ -4,4 +4,5 @@ export class JsonNode {
   path?: string;
   selected?: boolean;
   parentPath?: string;
+  editingNumber?: string;
 }
