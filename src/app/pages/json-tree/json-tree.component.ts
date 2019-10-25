@@ -132,7 +132,11 @@ export class JsonTreeComponent implements OnInit {
       data: 'test'
     }).afterClosed();
     // node.children.push(new JsonNode());
-    // console.log(this.currentJsonNodes);
+    // console.log(sonDithis.currentJsonNodes);
     // this.updateJsonTreeData(this.currentJsonNodes);
+  }
+
+  renameKey(node: JsonNode) {
+    node.name = 'test';
   }
 }

@@ -31,8 +31,10 @@ the display of tree, and language content when you choose a node.
     2. Pending
         - Function import and export json files.
         - Create the key for all files or one file.
-        - Create overlay to add a new key which can choose the default value for each file. 
-        
+        - Create overlay to add a new key which can choose the default value for each file.
+    3. Progress
+        - Implement rename for a node
+       
 # How to use
 
 - This project use angular to `serve` the app. So you need to install some Angular
