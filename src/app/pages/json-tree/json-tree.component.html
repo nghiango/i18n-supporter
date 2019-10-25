@@ -78,6 +78,7 @@
   <mat-icon class="item--clickable" [matMenuTriggerFor]="menuNode">more_vert</mat-icon>
   <mat-menu #menuNode="matMenu">
     <button mat-menu-item (click)="addKey(node)">Add Key</button>
+    <button mat-menu-item (click)="renameKey(node)">Rename Key</button>
     <button mat-menu-item (click)="removeKey(node)">Remove Key</button>
   </mat-menu>
 </ng-template>
