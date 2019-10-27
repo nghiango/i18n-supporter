@@ -148,10 +148,49 @@ export class JsonTreeComponent implements OnInit {
   }
 
   updateKeyName(node: JsonNode) {
+    const parentNode = this.getNodeByPath(node.parentPath, this.currentJsonNodes);
+    if (parentNode) {
+      const equallyLevelNodes = parentNode.children.filter(childNode => childNode.name === 'newName');
+      if (equallyLevelNodes.length > 0) {
+        alert('Please change to another name, your name is duplicated');
+      } else {
+        node.name = 'newName';
+        const newPath = this.getNewPath(node.path, 'newName');
+        node = this.updatePathOfNode(node, newPath);
+      }
+    }
     // TODO: update name of node, and loop all files to check condition no duplicate in the same level
   }
 
   exportToFiles() {
     // TODO: should use jsonDictionary to export to file.
+  }
+
+  private getNodeByPath(path: string, jsonNodes: JsonNode[]): JsonNode {
+    for (let i = 0; i < jsonNodes.length; i++) {
+      if (path === jsonNodes[i].path) {
+        return jsonNodes[i];
+      } else if (jsonNodes[i].children) {
+        const node = this.getNodeByPath(path, jsonNodes[i].children);
+        if (node) {
+          return node;
+        }
+      }
+    }
+    return null;
+  }
+
+  private getNewPath(path: string, newName: string): string {
+    return path.substring(0, path.lastIndexOf('.')) + `.${newName}`;
+  }
+
+  private updatePathOfNode(node: JsonNode, newPath: string): JsonNode {
+    const oldPath = node.path;
+    node.path = newPath;
+    this.files.forEach(file => {
+      file.jsonDictionary[newPath] = file.jsonDictionary[oldPath];
+      delete file.jsonDictionary[oldPath];
+    });
+    return node;
   }
 }
