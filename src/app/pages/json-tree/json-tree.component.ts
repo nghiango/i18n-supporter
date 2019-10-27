@@ -85,6 +85,7 @@ export class JsonTreeComponent implements OnInit {
     }
     this.currentJsonNodes = this.jsonService.buildJsonNodes(this.currentNestedJson, [], '');
     this.updateJsonTreeData(this.currentJsonNodes);
+    console.log(this.currentJsonNodes);
   }
 
   private updateJsonTreeData(jsonNodes: JsonNode[]) {
@@ -146,7 +147,11 @@ export class JsonTreeComponent implements OnInit {
     this.editNumber = '';
   }
 
-  updateKeyName(node) {
-    
+  updateKeyName(node: JsonNode) {
+    // TODO: update name of node, and loop all files to check condition no duplicate in the same level
+  }
+
+  exportToFiles() {
+    // TODO: should use jsonDictionary to export to file.
   }
 }

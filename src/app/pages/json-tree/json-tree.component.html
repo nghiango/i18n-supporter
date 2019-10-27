@@ -1,10 +1,10 @@
 <mat-sidenav-container class="example-container">
-  <mat-sidenav mode="side" opened style="width: 20%">
+  <mat-sidenav mode="side" opened style="width: 20%" #sidenav>
     <div class="json-tree__menu">
       <button mat-flat-button color="primary" [matMenuTriggerFor]="menu">Menu</button>
       <mat-menu #menu="matMenu">
         <button mat-menu-item (click)="fileImport.click()">Import</button>
-        <button mat-menu-item>Export</button>
+        <button mat-menu-item (click)="exportToFiles()">Export</button>
       </mat-menu>
 
       <input type="file" [hidden]="true" #fileImport
@@ -61,6 +61,7 @@
     </mat-tree>
   </mat-sidenav>
   <mat-sidenav-content>
+    <button *ngIf="!sidenav.opened" mat-flat-button (click)="sidenav.toggle()">Open Sidenav</button>
     <div class="json-tree__content" *ngIf="currentNode">
       <div class="json-tree__header">
         <h3>{{currentNode.name}}</h3>
@@ -97,7 +98,7 @@
 
 <ng-template #inputTemplate let-node>
   <mat-form-field style="width: 100%">
-    <input matInput placeholder="Please fill value">
+    <input matInput placeholder="Please fill value" required>
   </mat-form-field>
   <mat-icon class="item--clickable icon--green" (click)="updateKeyName(node)">done</mat-icon>
   <mat-icon class="item--clickable icon--red" (click)="exitEditMode()">close</mat-icon>
