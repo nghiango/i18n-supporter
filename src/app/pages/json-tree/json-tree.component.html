@@ -98,10 +98,10 @@
 
 <ng-template #inputTemplate let-node>
   <mat-form-field style="width: 100%">
-    <input matInput placeholder="Please fill value" required>
+    <input matInput placeholder="Please fill value" [formControl]="node.formControl" required>
   </mat-form-field>
   <mat-icon class="item--clickable icon--green" (click)="updateKeyName(node)">done</mat-icon>
-  <mat-icon class="item--clickable icon--red" (click)="exitEditMode()">close</mat-icon>
+  <mat-icon class="item--clickable icon--red" (click)="exitEditMode(node)">close</mat-icon>
 </ng-template>
 
 

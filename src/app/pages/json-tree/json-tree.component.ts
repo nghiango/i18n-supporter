@@ -143,54 +143,83 @@ export class JsonTreeComponent implements OnInit {
     node.editingNumber = this.editNumber;
   }
 
-  exitEditMode() {
+  exitEditMode(node: JsonNode) {
     this.editNumber = '';
+    node.formControl.setValue(node.name);
   }
 
   updateKeyName(node: JsonNode) {
-    const parentNode = this.getNodeByPath(node.parentPath, this.currentJsonNodes);
+    if (this.isNewKeyExistedInThisLevel(node) || node.formControl.invalid) {
+      this.exitEditMode(node);
+      alert('Your key is duplicated or blank, please change it!');
+    } else {
+      this.editNumber = '';
+      node.name = node.formControl.value;
+      const oldPath = node.path;
+      const newPath = node.path = this.getCombinePath(node.name, node.path);
+      this.updateParentPathOfChildren(node.path, node.children);
+      this.updatePathOfDictionary(oldPath, newPath);
+    }
+  }
+
+  private isNewKeyExistedInThisLevel(node: JsonNode) {
+    const parentKey = node.parentPath;
+    const parentNode = this.findNodeByPath(parentKey, this.currentJsonNodes);
     if (parentNode) {
-      const equallyLevelNodes = parentNode.children.filter(childNode => childNode.name === 'newName');
-      if (equallyLevelNodes.length > 0) {
-        alert('Please change to another name, your name is duplicated');
-      } else {
-        node.name = 'newName';
-        const newPath = this.getNewPath(node.path, 'newName');
-        node = this.updatePathOfNode(node, newPath);
+      for (let i = 0; i < parentNode.children.length; i++) {
+        if ((isNullOrUndefined(parentNode.children[i].editingNumber) || parentNode.children[i].editingNumber === '')
+          && parentNode.children[i].name === node.formControl.value) {
+          return true;
+        }
       }
     }
-    // TODO: update name of node, and loop all files to check condition no duplicate in the same level
+    return false;
   }
 
-  exportToFiles() {
-    // TODO: should use jsonDictionary to export to file.
-  }
-
-  private getNodeByPath(path: string, jsonNodes: JsonNode[]): JsonNode {
+  private findNodeByPath(path: string, jsonNodes: JsonNode[]): JsonNode {
     for (let i = 0; i < jsonNodes.length; i++) {
-      if (path === jsonNodes[i].path) {
+      if (jsonNodes[i].path === path) {
         return jsonNodes[i];
-      } else if (jsonNodes[i].children) {
-        const node = this.getNodeByPath(path, jsonNodes[i].children);
+      }
+      if (jsonNodes[i].children) {
+        const node = this.findNodeByPath(path, jsonNodes[i].children);
         if (node) {
-          return node;
+        return node;
         }
       }
     }
     return null;
   }
 
-  private getNewPath(path: string, newName: string): string {
-    return path.substring(0, path.lastIndexOf('.')) + `.${newName}`;
+  exportToFiles() {
+    // TODO: should use jsonDictionary to export to file.
   }
 
-  private updatePathOfNode(node: JsonNode, newPath: string): JsonNode {
-    const oldPath = node.path;
-    node.path = newPath;
+  private getCombinePath(name: string, path: string): string {
+    const pathArr = path.split('.');
+    if (pathArr[pathArr.length - 1] !== '') {
+      return path.substring(0, path.lastIndexOf('.') - 1) + `.${name}`;
+    }
+    let newPath = '';
+    for (let i = 0; i < (pathArr.length - 1); i++) {
+      if (i === (pathArr.length - 2)) {
+        newPath += name + '.';
+        return newPath;
+      }
+      newPath += pathArr[i] + '.';
+    }
+  }
+
+  private updateParentPathOfChildren(path: string, nodes: JsonNode[]) {
+    if (nodes) {
+      nodes.forEach(node => node.parentPath = path);
+    }
+  }
+
+  private updatePathOfDictionary(oldPath: string, newPath: string) {
     this.files.forEach(file => {
       file.jsonDictionary[newPath] = file.jsonDictionary[oldPath];
       delete file.jsonDictionary[oldPath];
     });
-    return node;
   }
 }
