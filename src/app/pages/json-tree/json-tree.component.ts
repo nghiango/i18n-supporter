@@ -149,15 +149,15 @@ export class JsonTreeComponent implements OnInit {
   }
 
   updateKeyName(node: JsonNode) {
-    if (this.isNewKeyExistedInThisLevel(node)) {
+    if (this.isNewKeyExistedInThisLevel(node) || node.formControl.invalid) {
       this.exitEditMode(node);
-      alert('Your name existed in current level, please change it!');
+      alert('Your key is duplicated or blank, please change it!');
     } else {
+      this.editNumber = '';
       node.name = node.formControl.value;
       const oldPath = node.path;
       const newPath = node.path = this.getCombinePath(node.name, node.path);
       this.updateParentPathOfChildren(node.path, node.children);
-      this.editNumber = '';
       this.updatePathOfDictionary(oldPath, newPath);
     }
   }
@@ -197,6 +197,9 @@ export class JsonTreeComponent implements OnInit {
 
   private getCombinePath(name: string, path: string): string {
     const pathArr = path.split('.');
+    if (pathArr[pathArr.length - 1] !== '') {
+      return path.substring(0, path.lastIndexOf('.') - 1) + `.${name}`;
+    }
     let newPath = '';
     for (let i = 0; i < (pathArr.length - 1); i++) {
       if (i === (pathArr.length - 2)) {
