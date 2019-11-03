@@ -28,12 +28,12 @@ the display of tree, and language content when you choose a node.
         - Remove a key of all files or one file.
         - Show content of combine json files, if one file is missing the key the content
         of this file should show the plus icon or something to add this key to the file.
+        - Implement rename for a node
     2. Pending
         - Function import and export json files.
         - Create the key for all files or one file.
-        - Create overlay to add a new key which can choose the default value for each file.
     3. Progress
-        - Implement rename for a node
+        - Create overlay to add a new key which can choose the default value for each file.
        
 # How to use
 
