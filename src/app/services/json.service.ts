@@ -22,7 +22,7 @@ export class JsonService {
             path = tempPath;
           }
         } else {
-          const finalPath = path + keys[i] + '.';
+          const finalPath = path + keys[i];
           jsonNodes.push({name: keys[i], children: null,
             path: finalPath, parentPath: tempPath,  formControl: new FormControl(keys[i], Validators.required)});
         }

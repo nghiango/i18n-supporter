@@ -46,10 +46,9 @@ export class JsonTreeComponent implements OnInit {
   }
 
   private updateValueFormControl(files: FileDto[], jsonNode: JsonNode) {
-    const path = jsonNode.path.substring(0, jsonNode.path.lastIndexOf('.'));
     files.forEach(file => {
-      file.formControl.setValue(file.jsonDictionary[path]);
-      if (!(path in file.jsonDictionary)) {
+      file.formControl.setValue(file.jsonDictionary[jsonNode.path]);
+      if (!(jsonNode.path in file.jsonDictionary)) {
         file.notExisted = true;
         file.formControl.disable();
       } else {
@@ -86,6 +85,7 @@ export class JsonTreeComponent implements OnInit {
     }
     this.currentJsonNodes = this.jsonService.buildJsonNodes(this.currentNestedJson, [], '');
     this.updateJsonTreeData(this.currentJsonNodes);
+    console.log(this.currentJsonNodes);
   }
 
   private updateJsonTreeData(jsonNodes: JsonNode[]) {
@@ -154,9 +154,11 @@ export class JsonTreeComponent implements OnInit {
       alert('Your name existed in current level, please change it!');
     } else {
       node.name = node.formControl.value;
-      node.path = this.getPathWithNewValue(node.name, node.path);
+      const oldPath = node.path;
+      const newPath = node.path = this.getCombinePath(node.name, node.path);
       this.updateParentPathOfChildren(node.path, node.children);
       this.editNumber = '';
+      this.updatePathOfDictionary(oldPath, newPath);
     }
   }
 
@@ -182,14 +184,18 @@ export class JsonTreeComponent implements OnInit {
       if (jsonNodes[i].children) {
         const node = this.findNodeByPath(path, jsonNodes[i].children);
         if (node) {
-          return node;
+        return node;
         }
       }
     }
     return null;
   }
 
-  private getPathWithNewValue(name: string, path: string): string {
+  exportToFiles() {
+    // TODO: should use jsonDictionary to export to file.
+  }
+
+  private getCombinePath(name: string, path: string): string {
     const pathArr = path.split('.');
     let newPath = '';
     for (let i = 0; i < (pathArr.length - 1); i++) {
@@ -205,5 +211,12 @@ export class JsonTreeComponent implements OnInit {
     if (nodes) {
       nodes.forEach(node => node.parentPath = path);
     }
+  }
+
+  private updatePathOfDictionary(oldPath: string, newPath: string) {
+    this.files.forEach(file => {
+      file.jsonDictionary[newPath] = file.jsonDictionary[oldPath];
+      delete file.jsonDictionary[oldPath];
+    });
   }
 }
