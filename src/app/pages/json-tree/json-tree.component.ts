@@ -46,9 +46,10 @@ export class JsonTreeComponent implements OnInit {
   }
 
   private updateValueFormControl(files: FileDto[], jsonNode: JsonNode) {
+    const path = jsonNode.path.substring(0, jsonNode.path.lastIndexOf('.'));
     files.forEach(file => {
-      file.formControl.setValue(file.jsonDictionary[jsonNode.path]);
-      if (!(jsonNode.path in file.jsonDictionary)) {
+      file.formControl.setValue(file.jsonDictionary[path]);
+      if (!(path in file.jsonDictionary)) {
         file.notExisted = true;
         file.formControl.disable();
       } else {
@@ -142,11 +143,67 @@ export class JsonTreeComponent implements OnInit {
     node.editingNumber = this.editNumber;
   }
 
-  exitEditMode() {
+  exitEditMode(node: JsonNode) {
     this.editNumber = '';
+    node.formControl.setValue(node.name);
   }
 
-  updateKeyName(node) {
-    
+  updateKeyName(node: JsonNode) {
+    if (this.isNewKeyExistedInThisLevel(node)) {
+      this.exitEditMode(node);
+      alert('Your name existed in current level, please change it!');
+    } else {
+      node.name = node.formControl.value;
+      node.path = this.getPathWithNewValue(node.name, node.path);
+      this.updateParentPathOfChildren(node.path, node.children);
+      this.editNumber = '';
+    }
+  }
+
+  private isNewKeyExistedInThisLevel(node: JsonNode) {
+    const parentKey = node.parentPath;
+    const parentNode = this.findNodeByPath(parentKey, this.currentJsonNodes);
+    if (parentNode) {
+      for (let i = 0; i < parentNode.children.length; i++) {
+        if ((isNullOrUndefined(parentNode.children[i].editingNumber) || parentNode.children[i].editingNumber === '')
+          && parentNode.children[i].name === node.formControl.value) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  private findNodeByPath(path: string, jsonNodes: JsonNode[]): JsonNode {
+    for (let i = 0; i < jsonNodes.length; i++) {
+      if (jsonNodes[i].path === path) {
+        return jsonNodes[i];
+      }
+      if (jsonNodes[i].children) {
+        const node = this.findNodeByPath(path, jsonNodes[i].children);
+        if (node) {
+          return node;
+        }
+      }
+    }
+    return null;
+  }
+
+  private getPathWithNewValue(name: string, path: string): string {
+    const pathArr = path.split('.');
+    let newPath = '';
+    for (let i = 0; i < (pathArr.length - 1); i++) {
+      if (i === (pathArr.length - 2)) {
+        newPath += name + '.';
+        return newPath;
+      }
+      newPath += pathArr[i] + '.';
+    }
+  }
+
+  private updateParentPathOfChildren(path: string, nodes: JsonNode[]) {
+    if (nodes) {
+      nodes.forEach(node => node.parentPath = path);
+    }
   }
 }
