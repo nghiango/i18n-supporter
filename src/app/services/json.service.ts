@@ -1,6 +1,7 @@
-  import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {JsonNode} from '../models/json-node';
-  import {FormControl, Validators} from '@angular/forms';
+import {FormControl, Validators} from '@angular/forms';
+import {Builder} from '../shared/buider';
 
 @Injectable()
 export class JsonService {
@@ -8,6 +9,7 @@ export class JsonService {
   constructor() { }
 
   public buildJsonNodes(resource: Object, jsonNodes: JsonNode[], path: string) {
+    const JsonNodeBuilder = Builder(JsonNode);
     const tempPath = path;
     const keys = Object.keys(resource);
     if (keys.length > 0) {
@@ -15,8 +17,13 @@ export class JsonService {
         if (typeof resource[keys[i]] !== 'string') {
           if (Object.keys(resource[keys[i]]).length > 0) {
             path += keys[i] + '.';
-            const node = {name: keys[i], children: [], path: path, parentPath: tempPath,
-              formControl: new FormControl(keys[i], Validators.required)};
+            const node = JsonNodeBuilder
+              .name(keys[i])
+              .children([])
+              .path(path)
+              .parentPath(tempPath)
+              .formControl(new FormControl(keys[i], Validators.required))
+              .build();
             node.children = this.buildJsonNodes(resource[keys[i]], [],  path);
             jsonNodes.push(node);
             path = tempPath;
