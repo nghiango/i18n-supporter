@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
 import {NestedTreeControl} from '@angular/cdk/tree';
 import {MatDialog, MatTreeNestedDataSource} from '@angular/material';
 import {JsonNode} from '../../models/json-node';
@@ -8,6 +8,7 @@ import {FileService} from '../../services/file.service';
 import {FileDto} from '../../models/file-dto';
 import {isNullOrUndefined, log} from 'util';
 import {AddKeyDialogComponent} from '../../components/add-key-dialog/add-key-dialog.component';
+import {CdkTextareaAutosize} from '@angular/cdk/text-field';
 
 @Component({
   selector: 'json-json-tree',
@@ -19,6 +20,7 @@ export class JsonTreeComponent implements OnInit {
   public files: FileDto[] = [];
   public treeControl = new NestedTreeControl<JsonNode>(node => node.children);
   public dataSource = new MatTreeNestedDataSource<JsonNode>();
+  public isReviewMode: boolean;
   private currentJsonDictionary: Object;
   private currentNestedJson: Object;
   private currentJsonNodes: JsonNode[];
@@ -29,12 +31,15 @@ export class JsonTreeComponent implements OnInit {
     public dialog: MatDialog
   ) {}
 
+  @ViewChild('autosize') autosize: CdkTextareaAutosize;
+
   ngOnInit() {}
   hasChild = (_: number, node: JsonNode) => !!node.children && node.children.length > 0;
 
   openNode(node: JsonNode) {
     this.toggleNode(node);
     this.currentNode = node;
+    this.isReviewMode = false;
     this.updateValueFormControl(this.files, this.currentNode);
   }
 
@@ -85,7 +90,6 @@ export class JsonTreeComponent implements OnInit {
     }
     this.currentJsonNodes = this.jsonService.buildJsonNodes(this.currentNestedJson, [], '');
     this.updateJsonTreeData(this.currentJsonNodes);
-    console.log(this.currentJsonNodes);
   }
 
   private updateJsonTreeData(jsonNodes: JsonNode[]) {
@@ -191,8 +195,9 @@ export class JsonTreeComponent implements OnInit {
     return null;
   }
 
-  exportToFiles() {
-    // TODO: should use jsonDictionary to export to file.
+  reviewFiles() {
+    this.isReviewMode = true;
+    this.files.forEach(file => file.nestedJsonContent = this.jsonService.buildJson(file.jsonDictionary));
   }
 
   private getCombinePath(name: string, path: string): string {
