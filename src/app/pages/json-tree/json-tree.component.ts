@@ -89,6 +89,7 @@ export class JsonTreeComponent implements OnInit {
       this.currentNestedJson = this.jsonService.buildJson(this.currentJsonDictionary);
     }
     this.currentJsonNodes = this.jsonService.buildJsonNodes(this.currentNestedJson, [], '');
+
     this.updateJsonTreeData(this.currentJsonNodes);
   }
 
@@ -226,5 +227,9 @@ export class JsonTreeComponent implements OnInit {
       file.jsonDictionary[newPath] = file.jsonDictionary[oldPath];
       delete file.jsonDictionary[oldPath];
     });
+  }
+
+  clearAll() {
+    
   }
 }

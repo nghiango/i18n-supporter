@@ -5,6 +5,7 @@
       <mat-menu #menu="matMenu">
         <button mat-menu-item (click)="fileImport.click()">Import</button>
         <button mat-menu-item (click)="reviewFiles()">Review</button>
+        <button mat-menu-item (click)="clearAll()">Clear</button>
       </mat-menu>
 
       <input type="file" [hidden]="true" #fileImport

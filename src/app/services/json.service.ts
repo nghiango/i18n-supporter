@@ -9,7 +9,6 @@ export class JsonService {
   constructor() { }
 
   public buildJsonNodes(resource: Object, jsonNodes: JsonNode[], path: string) {
-    const JsonNodeBuilder = Builder(JsonNode);
     const tempPath = path;
     const keys = Object.keys(resource);
     if (keys.length > 0) {
@@ -17,7 +16,7 @@ export class JsonService {
         if (typeof resource[keys[i]] !== 'string') {
           if (Object.keys(resource[keys[i]]).length > 0) {
             path += keys[i] + '.';
-            const node = JsonNodeBuilder
+            const node = Builder(JsonNode)
               .name(keys[i])
               .children([])
               .path(path)
@@ -30,8 +29,13 @@ export class JsonService {
           }
         } else {
           const finalPath = path + keys[i];
-          jsonNodes.push({name: keys[i], children: null,
-            path: finalPath, parentPath: tempPath,  formControl: new FormControl(keys[i], Validators.required)});
+          const node = Builder(JsonNode)
+            .name(keys[i])
+            .path(finalPath)
+            .formControl(new FormControl(keys[i], Validators.required))
+            .parentPath(tempPath)
+            .build();
+          jsonNodes.push(node);
         }
       }
     }

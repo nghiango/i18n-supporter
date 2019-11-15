@@ -4,5 +4,10 @@
       "gender": "another name",
       "name": "my name"
     }
+  },
+  "profile": {
+    "person": {
+      "name": "Lam"
+    }
   }
 }
