@@ -3,5 +3,10 @@
     "duplicateOverlay": {
       "gender": "Gender"
     }
+  },
+  "profile": {
+    "person": {
+      "name": "Nghia"
+    }
   }
 }

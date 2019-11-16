@@ -4,7 +4,8 @@
       <button mat-flat-button color="primary" [matMenuTriggerFor]="menu">Menu</button>
       <mat-menu #menu="matMenu">
         <button mat-menu-item (click)="fileImport.click()">Import</button>
-        <button mat-menu-item (click)="exportToFiles()">Export</button>
+        <button mat-menu-item (click)="reviewFiles()">Review</button>
+        <button mat-menu-item (click)="clearAll()">Clear</button>
       </mat-menu>
 
       <input type="file" [hidden]="true" #fileImport
@@ -62,7 +63,7 @@
   </mat-sidenav>
   <mat-sidenav-content>
     <button *ngIf="!sidenav.opened" mat-flat-button (click)="sidenav.toggle()">Open Sidenav</button>
-    <div class="json-tree__content" *ngIf="currentNode">
+    <div class="json-tree__content" *ngIf="currentNode && !isReviewMode">
       <div class="json-tree__header">
         <h3>{{currentNode.name}}</h3>
         <mat-icon class="icon__medium icon--red item--clickable"
@@ -83,7 +84,32 @@
         </div>
       </div>
     </div>
+    <div class="json-tree__review" *ngIf="isReviewMode">
+      <mat-accordion>
+        <div *ngFor="let file of files">
+          <mat-expansion-panel>
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                {{file.fileName}}
+              </mat-panel-title>
+            </mat-expansion-panel-header>
 
+            <mat-form-field class="full-width">
+              <textarea matInput
+                        cdkTextareaAutosize
+                        #autosize="cdkTextareaAutosize"
+                        cdkAutosizeMinRows="10"
+                        cdkAutosizeMaxRows="10000"
+                        disabled="true"
+                        class="json-tree__text-review"
+                        value="{{jsonService.formatJsonString(file.nestedJsonContent)}}">
+
+        </textarea>
+            </mat-form-field>
+          </mat-expansion-panel>
+        </div>
+      </mat-accordion>
+    </div>
   </mat-sidenav-content>
 </mat-sidenav-container>
 

@@ -1,6 +1,7 @@
-  import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {JsonNode} from '../models/json-node';
-  import {FormControl, Validators} from '@angular/forms';
+import {FormControl, Validators} from '@angular/forms';
+import {Builder} from '../shared/buider';
 
 @Injectable()
 export class JsonService {
@@ -15,16 +16,26 @@ export class JsonService {
         if (typeof resource[keys[i]] !== 'string') {
           if (Object.keys(resource[keys[i]]).length > 0) {
             path += keys[i] + '.';
-            const node = {name: keys[i], children: [], path: path, parentPath: tempPath,
-              formControl: new FormControl(keys[i], Validators.required)};
+            const node = Builder(JsonNode)
+              .name(keys[i])
+              .children([])
+              .path(path)
+              .parentPath(tempPath)
+              .formControl(new FormControl(keys[i], Validators.required))
+              .build();
             node.children = this.buildJsonNodes(resource[keys[i]], [],  path);
             jsonNodes.push(node);
             path = tempPath;
           }
         } else {
           const finalPath = path + keys[i];
-          jsonNodes.push({name: keys[i], children: null,
-            path: finalPath, parentPath: tempPath,  formControl: new FormControl(keys[i], Validators.required)});
+          const node = Builder(JsonNode)
+            .name(keys[i])
+            .path(finalPath)
+            .formControl(new FormControl(keys[i], Validators.required))
+            .parentPath(tempPath)
+            .build();
+          jsonNodes.push(node);
         }
       }
     }
