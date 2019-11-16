@@ -230,6 +230,11 @@ export class JsonTreeComponent implements OnInit {
   }
 
   clearAll() {
-    
+    this.currentJsonNodes = null;
+    this.currentJsonDictionary = null;
+    this.currentNestedJson = null;
+    this.currentNode = null;
+    this.files = [];
+    this.updateJsonTreeData(this.currentJsonNodes);
   }
 }
