@@ -1,0 +1,10 @@
+.add-key-dialog {
+  width: 70vw;
+  &__value {
+    display: block;
+  }
+  &__footer {
+   display: flex;
+    justify-content: flex-end;
+  }
+}

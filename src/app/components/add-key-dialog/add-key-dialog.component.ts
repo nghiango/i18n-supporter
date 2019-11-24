@@ -7,7 +7,7 @@ import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
   styleUrls: ['./add-key-dialog.component.scss']
 })
 export class AddKeyDialogComponent implements OnInit {
-
+  public files = ['en.json', 'de.json', 'fr.json'];
   constructor(
     public dialogRef: MatDialogRef<AddKeyDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: string
@@ -16,4 +16,11 @@ export class AddKeyDialogComponent implements OnInit {
   ngOnInit() {
   }
 
+  closeDialog() {
+
+  }
+
+  addKey() {
+
+  }
 }
