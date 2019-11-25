@@ -134,13 +134,12 @@ export class JsonTreeComponent implements OnInit {
     return jsonNodes;
   }
 
-  addKey(node: JsonNode) {
+  addKey(currentNode: JsonNode) {
     this.dialog.open(AddKeyDialogComponent, {
-      data: 'test'
-    }).afterClosed();
-    // node.children.push(new JsonNode());
-    // console.log(sonDithis.currentJsonNodes);
-    // this.updateJsonTreeData(this.currentJsonNodes);
+      data: this.files
+    }).afterClosed().subscribe(node => {
+      console.log(node);
+    });
   }
 
   enterEditMode(node: JsonNode) {
