@@ -9,6 +9,7 @@ import {FileDto} from '../../models/file-dto';
 import {isNullOrUndefined, log} from 'util';
 import {AddKeyDialogComponent} from '../../components/add-key-dialog/add-key-dialog.component';
 import {CdkTextareaAutosize} from '@angular/cdk/text-field';
+import { flatten, unflatten } from 'flat';
 
 @Component({
   selector: 'json-json-tree',
@@ -28,7 +29,7 @@ export class JsonTreeComponent implements OnInit {
   constructor(
     private jsonService: JsonService,
     private fileService: FileService,
-    public dialog: MatDialog
+    public dialog: MatDialog,
   ) {}
 
   @ViewChild('autosize', { static: false }) autosize: CdkTextareaAutosize;
@@ -69,13 +70,20 @@ export class JsonTreeComponent implements OnInit {
 
   handleFileInput($event) {
     const fileImports: File[] = Array.from($event.target.files);
+    let count = 0;
     fileImports.forEach(file => {
       this.fileService.readContentOfFile(file).toPromise().then(content => {
         const jsonObject = this.jsonService.parseToJson(content);
-        const jsonDictionary = this.jsonService.buildDictionary(jsonObject, '', {});
+        // const jsonDictionary = this.jsonService.buildDictionary(jsonObject, '', {});
+        const jsonDictionary = flatten(jsonObject);
+
         const fileDto = new FileDto(file.name, jsonDictionary, new FormControl());
         this.files.push(fileDto);
         this.initJsonTree(jsonObject, Object.assign({}, jsonDictionary));
+        count++;
+        if (count === fileImports.length) {
+          this.updateJsonTreeData(this.currentJsonNodes);
+        }
       });
     });
   }
@@ -86,11 +94,11 @@ export class JsonTreeComponent implements OnInit {
       this.currentJsonDictionary = jsonDictionary;
     } else {
       this.currentJsonDictionary = this.jsonService.mergeKeys(this.currentJsonDictionary, jsonDictionary);
-      this.currentNestedJson = this.jsonService.buildJson(this.currentJsonDictionary);
+      this.currentNestedJson = unflatten(this.currentJsonDictionary);
+      // this.currentNestedJson = this.jsonService.buildJson(this.currentJsonDictionary);
     }
-    this.currentJsonNodes = this.jsonService.buildJsonNodes(this.currentNestedJson, [], '');
 
-    this.updateJsonTreeData(this.currentJsonNodes);
+    this.currentJsonNodes = this.jsonService.buildJsonNodes(this.currentNestedJson, [], '');
   }
 
   private updateJsonTreeData(jsonNodes: JsonNode[]) {
