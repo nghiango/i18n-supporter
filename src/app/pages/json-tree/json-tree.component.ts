@@ -31,7 +31,7 @@ export class JsonTreeComponent implements OnInit {
     public dialog: MatDialog
   ) {}
 
-  @ViewChild('autosize') autosize: CdkTextareaAutosize;
+  @ViewChild('autosize', { static: false }) autosize: CdkTextareaAutosize;
 
   ngOnInit() {}
   hasChild = (_: number, node: JsonNode) => !!node.children && node.children.length > 0;
@@ -136,9 +136,12 @@ export class JsonTreeComponent implements OnInit {
 
   addKey(currentNode: JsonNode) {
     this.dialog.open(AddKeyDialogComponent, {
-      data: this.files
-    }).afterClosed().subscribe(node => {
-      console.log(node);
+      data: {
+        files: this.files,
+        node: currentNode
+      }
+    }).afterClosed().subscribe(() => {
+      this.updateJsonTreeData(this.currentJsonNodes);
     });
   }
 
@@ -160,7 +163,7 @@ export class JsonTreeComponent implements OnInit {
       this.editNumber = '';
       node.name = node.formControl.value;
       const oldPath = node.path;
-      const newPath = node.path = this.getCombinePath(node.name, node.path);
+      const newPath = node.path = this.jsonService.getCombinePath(node.name, node.path);
       this.updateParentPathOfChildren(node.path, node.children);
       this.updatePathOfDictionary(oldPath, newPath);
     }
@@ -198,21 +201,6 @@ export class JsonTreeComponent implements OnInit {
   reviewFiles() {
     this.isReviewMode = true;
     this.files.forEach(file => file.nestedJsonContent = this.jsonService.buildJson(file.jsonDictionary));
-  }
-
-  private getCombinePath(name: string, path: string): string {
-    const pathArr = path.split('.');
-    if (pathArr[pathArr.length - 1] !== '') {
-      return path.substring(0, path.lastIndexOf('.') - 1) + `.${name}`;
-    }
-    let newPath = '';
-    for (let i = 0; i < (pathArr.length - 1); i++) {
-      if (i === (pathArr.length - 2)) {
-        newPath += name + '.';
-        return newPath;
-      }
-      newPath += pathArr[i] + '.';
-    }
   }
 
   private updateParentPathOfChildren(path: string, nodes: JsonNode[]) {

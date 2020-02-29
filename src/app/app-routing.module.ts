@@ -4,9 +4,9 @@ import {PreloadAllModules, RouterModule, Routes} from '@angular/router';
 
 const routes: Routes = [
   { path: '', redirectTo: '/dashboard', pathMatch: 'full'},
-  { path: 'dashboard', loadChildren: './pages/dash-board/dashboard.module#DashboardModule'},
-  { path: 'json-replace', loadChildren: './pages/json-replace/json-replace.module#JsonReplaceModule'},
-  { path: 'json-tree', loadChildren: './pages/json-tree/json-tree.module#JsonTreeModule'}
+  { path: 'dashboard', loadChildren: () => import('./pages/dash-board/dashboard.module').then(m => m.DashboardModule)},
+  { path: 'json-replace', loadChildren: () => import('./pages/json-replace/json-replace.module').then(m => m.JsonReplaceModule)},
+  { path: 'json-tree', loadChildren: () => import('./pages/json-tree/json-tree.module').then(m => m.JsonTreeModule)}
 ];
 
 @NgModule({

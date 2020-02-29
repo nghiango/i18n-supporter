@@ -27,7 +27,7 @@ export class JsonReplaceComponent implements OnInit {
   public resultContent = new TextAreaFileContent(new FormControl(), false);
   public originalFileContent = new TextAreaFileContent(new FormControl(), false);
 
-  @ViewChild('autosize') autosize: CdkTextareaAutosize;
+  @ViewChild('autosize', { static: true }) autosize: CdkTextareaAutosize;
   fileResult: boolean;
   constructor(
     private fileService: FileService,
