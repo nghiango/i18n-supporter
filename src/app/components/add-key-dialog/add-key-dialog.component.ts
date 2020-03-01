@@ -32,9 +32,11 @@ export class AddKeyDialogComponent implements OnInit {
   }
 
   addKey() {
+    const nodePath = this.node.path;
     const path = `${this.getCurrentPath(this.node)}.${this.nodeName.value}`;
     this.files.forEach(file => {
       file.jsonDictionary[path] = file.formControl.value;
+      delete file.jsonDictionary[nodePath];
     });
     const node = Builder(JsonNode)
                   .name(this.nodeName.value)
@@ -48,6 +50,9 @@ export class AddKeyDialogComponent implements OnInit {
   }
 
   private getCurrentPath(node: JsonNode): string {
+    if (node.children.length === 0) {
+      this.node.path = `${node.path}.`;
+    }
     return node.path.substring(0, node.path.lastIndexOf('.'));
   }
 }
