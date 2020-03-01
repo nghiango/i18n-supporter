@@ -9,6 +9,7 @@ import {FileDto} from '../../models/file-dto';
 import {isNullOrUndefined, log} from 'util';
 import {AddKeyDialogComponent} from '../../components/add-key-dialog/add-key-dialog.component';
 import {CdkTextareaAutosize} from '@angular/cdk/text-field';
+import { flatten, unflatten } from 'flat';
 
 @Component({
   selector: 'json-json-tree',
@@ -28,10 +29,10 @@ export class JsonTreeComponent implements OnInit {
   constructor(
     private jsonService: JsonService,
     private fileService: FileService,
-    public dialog: MatDialog
+    public dialog: MatDialog,
   ) {}
 
-  @ViewChild('autosize') autosize: CdkTextareaAutosize;
+  @ViewChild('autosize', { static: false }) autosize: CdkTextareaAutosize;
 
   ngOnInit() {}
   hasChild = (_: number, node: JsonNode) => !!node.children && node.children.length > 0;
@@ -69,13 +70,20 @@ export class JsonTreeComponent implements OnInit {
 
   handleFileInput($event) {
     const fileImports: File[] = Array.from($event.target.files);
+    let count = 0;
     fileImports.forEach(file => {
       this.fileService.readContentOfFile(file).toPromise().then(content => {
         const jsonObject = this.jsonService.parseToJson(content);
-        const jsonDictionary = this.jsonService.buildDictionary(jsonObject, '', {});
+        // const jsonDictionary = this.jsonService.buildDictionary(jsonObject, '', {});
+        const jsonDictionary = flatten(jsonObject);
+
         const fileDto = new FileDto(file.name, jsonDictionary, new FormControl());
         this.files.push(fileDto);
         this.initJsonTree(jsonObject, Object.assign({}, jsonDictionary));
+        count++;
+        if (count === fileImports.length) {
+          this.updateJsonTreeData(this.currentJsonNodes);
+        }
       });
     });
   }
@@ -86,11 +94,11 @@ export class JsonTreeComponent implements OnInit {
       this.currentJsonDictionary = jsonDictionary;
     } else {
       this.currentJsonDictionary = this.jsonService.mergeKeys(this.currentJsonDictionary, jsonDictionary);
-      this.currentNestedJson = this.jsonService.buildJson(this.currentJsonDictionary);
+      this.currentNestedJson = unflatten(this.currentJsonDictionary);
+      // this.currentNestedJson = this.jsonService.buildJson(this.currentJsonDictionary);
     }
-    this.currentJsonNodes = this.jsonService.buildJsonNodes(this.currentNestedJson, [], '');
 
-    this.updateJsonTreeData(this.currentJsonNodes);
+    this.currentJsonNodes = this.jsonService.buildJsonNodes(this.currentNestedJson, [], '');
   }
 
   private updateJsonTreeData(jsonNodes: JsonNode[]) {
@@ -134,13 +142,15 @@ export class JsonTreeComponent implements OnInit {
     return jsonNodes;
   }
 
-  addKey(node: JsonNode) {
+  addKey(currentNode: JsonNode) {
     this.dialog.open(AddKeyDialogComponent, {
-      data: 'test'
-    }).afterClosed();
-    // node.children.push(new JsonNode());
-    // console.log(sonDithis.currentJsonNodes);
-    // this.updateJsonTreeData(this.currentJsonNodes);
+      data: {
+        files: this.files,
+        node: currentNode
+      }
+    }).afterClosed().subscribe(() => {
+      this.updateJsonTreeData(this.currentJsonNodes);
+    });
   }
 
   enterEditMode(node: JsonNode) {
@@ -161,7 +171,7 @@ export class JsonTreeComponent implements OnInit {
       this.editNumber = '';
       node.name = node.formControl.value;
       const oldPath = node.path;
-      const newPath = node.path = this.getCombinePath(node.name, node.path);
+      const newPath = node.path = this.jsonService.getCombinePath(node.name, node.path);
       this.updateParentPathOfChildren(node.path, node.children);
       this.updatePathOfDictionary(oldPath, newPath);
     }
@@ -199,21 +209,6 @@ export class JsonTreeComponent implements OnInit {
   reviewFiles() {
     this.isReviewMode = true;
     this.files.forEach(file => file.nestedJsonContent = this.jsonService.buildJson(file.jsonDictionary));
-  }
-
-  private getCombinePath(name: string, path: string): string {
-    const pathArr = path.split('.');
-    if (pathArr[pathArr.length - 1] !== '') {
-      return path.substring(0, path.lastIndexOf('.') - 1) + `.${name}`;
-    }
-    let newPath = '';
-    for (let i = 0; i < (pathArr.length - 1); i++) {
-      if (i === (pathArr.length - 2)) {
-        newPath += name + '.';
-        return newPath;
-      }
-      newPath += pathArr[i] + '.';
-    }
   }
 
   private updateParentPathOfChildren(path: string, nodes: JsonNode[]) {

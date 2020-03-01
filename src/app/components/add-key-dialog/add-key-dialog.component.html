@@ -1,11 +1,23 @@
 <div class="add-key-dialog">
   <div class="add-key-dialog__header">
-    Header
+    Add new key
   </div>
   <div class="add-key-dialog__body">
-
+    <div class="add-key-dialog__key">
+      <mat-form-field floatLabel="always" class="add-key-dialog__value">
+        <mat-label>Your new key</mat-label>
+        <input [formControl]="nodeName" matInput placeholder="Enter new key">
+      </mat-form-field>
+    </div>
+    <div class="">
+      <mat-form-field floatLabel="always" *ngFor="let file of files" class="add-key-dialog__value">
+        <mat-label>{{file.fileName}}</mat-label>
+        <input [formControl]="file.formControl" matInput placeholder="Enter value">
+      </mat-form-field>
+    </div>
   </div>
   <div class="add-key-dialog__footer">
-
+    <button mat-raised-button (click)="closeDialog()" class="mr-2">Cancel</button>
+    <button mat-raised-button color="primary" (click)="addKey()">Add</button>
   </div>
 </div>

@@ -111,4 +111,19 @@ export class JsonService {
     });
     return currentJsonDictionary;
   }
+
+  public getCombinePath(name: string, path: string): string {
+    const pathArr = path.split('.');
+    if (pathArr[pathArr.length - 1] !== '') {
+      return path.substring(0, path.lastIndexOf('.') - 1) + `.${name}`;
+    }
+    let newPath = '';
+    for (let i = 0; i < (pathArr.length - 1); i++) {
+      if (i === (pathArr.length - 2)) {
+        newPath += name + '.';
+        return newPath;
+      }
+      newPath += pathArr[i] + '.';
+    }
+  }
 }
