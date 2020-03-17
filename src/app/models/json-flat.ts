@@ -1,4 +1,5 @@
 export class JsonFlat {
-  path: string;
-  value: string;
+  name: string;
+  level: number;
+  hasChildren: boolean;
 }
