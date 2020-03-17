@@ -1,6 +1,7 @@
+import { JsonFlat } from './../../models/json-flat';
 import {Component, OnInit, ViewChild} from '@angular/core';
-import {NestedTreeControl} from '@angular/cdk/tree';
-import {MatDialog, MatTreeNestedDataSource} from '@angular/material';
+import {NestedTreeControl, FlatTreeControl} from '@angular/cdk/tree';
+import {MatDialog, MatTreeNestedDataSource, MatTreeFlatDataSource, MatTreeFlattener} from '@angular/material';
 import {JsonNode} from '../../models/json-node';
 import {JsonService} from '../../services/json.service';
 import {FormControl} from '@angular/forms';
@@ -11,6 +12,30 @@ import {AddKeyDialogComponent} from '../../components/add-key-dialog/add-key-dia
 import {CdkTextareaAutosize} from '@angular/cdk/text-field';
 import {flatten, unflatten} from 'flat';
 
+function nodeTransformer(node: JsonNode, level: number) {
+  // console.log(node);
+  return {
+    name: node.name,
+    level,
+    hasChildren: node.children ? node.children.length > 0 : false,
+  };
+}
+
+// Function that gets a flat node's level
+function getNodeLevel({level}: JsonFlat) {
+  return level;
+}
+
+// Function that determines whether a flat node is expandable or not
+function getIsNodeExpandable({hasChildren}: JsonFlat) {
+  return hasChildren;
+}
+
+// Function that returns a nested node's list of children
+function getNodeChildren({children}: JsonNode) {
+  return children;
+}
+
 @Component({
   selector: 'json-json-tree',
   templateUrl: './json-tree.component.html',
@@ -19,8 +44,10 @@ import {flatten, unflatten} from 'flat';
 export class JsonTreeComponent implements OnInit {
   public currentNode: JsonNode;
   public files: FileDto[] = [];
-  public treeControl = new NestedTreeControl<JsonNode>(node => node.children);
-  public dataSource = new MatTreeNestedDataSource<JsonNode>();
+  // public treeControl = new NestedTreeControl<JsonNode>(node => node.children);
+  // public dataSource = new MatTreeNestedDataSource<JsonNode>();
+  public treeControl = new FlatTreeControl<JsonFlat>(getNodeLevel, getIsNodeExpandable);
+  public dataSource: MatTreeFlatDataSource<JsonNode, JsonFlat>;
   public isReviewMode: boolean;
   private currentJsonDictionary: Object;
   private currentNestedJson: Object;
@@ -102,9 +129,16 @@ export class JsonTreeComponent implements OnInit {
   }
 
   private updateJsonTreeData(jsonNodes: JsonNode[]) {
-    this.dataSource.data = null;
+    // console.log(jsonNodes);
+    const treeFlatener = new MatTreeFlattener<JsonNode, JsonFlat>(
+      nodeTransformer,
+      getNodeLevel,
+      getIsNodeExpandable,
+      getNodeChildren
+    );
+    this.dataSource = new MatTreeFlatDataSource(this.treeControl, treeFlatener);
+    // this.dataSource.data = null;
     this.dataSource.data = jsonNodes;
-    this.treeControl.dataNodes = jsonNodes;
   }
 
   addKeyInFile(file: FileDto) {

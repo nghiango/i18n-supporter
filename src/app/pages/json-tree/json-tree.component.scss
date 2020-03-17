@@ -1,3 +1,13 @@
+.virtual-scroll-container {
+  border: 2px solid cyan;
+  height: 80%;
+  overflow: auto;
+}
+
+cdk-tree-node {
+  display: block;
+}
+
 .json-tree {
 
   &__content {

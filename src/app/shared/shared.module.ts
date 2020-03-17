@@ -7,6 +7,7 @@ import {CommonModule} from '@angular/common';
 import {FileService} from '../services/file.service';
 import {MatDialogModule, MatExpansionModule, MatIconModule, MatMenuModule, MatSidenavModule, MatTreeModule} from '@angular/material';
 import {JsonService} from '../services/json.service';
+import { ScrollingModule } from '@angular/cdk/scrolling';
 
 @NgModule({
   declarations: [],
@@ -28,7 +29,8 @@ import {JsonService} from '../services/json.service';
     MatSidenavModule,
     MatMenuModule,
     MatDialogModule,
-    MatExpansionModule
+    MatExpansionModule,
+    ScrollingModule
   ],
   providers: [FileService, JsonService],
 })
