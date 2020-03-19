@@ -13,7 +13,6 @@ import {CdkTextareaAutosize} from '@angular/cdk/text-field';
 import { flatten, unflatten } from 'flat';
 
 function nodeTransformer(node: JsonNode, level: number) {
-  // console.log(node);
   return {
     name: node.name,
     level,
