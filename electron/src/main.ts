@@ -1,7 +1,7 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
-import * as path from 'path';
+import { app, BrowserWindow } from 'electron';
 import * as url from 'url';
-import * as fs from 'fs';
+import { joinPath } from './services/path.service';
+import fileService from './services/file.service';
 
 let win: BrowserWindow;
 
@@ -14,6 +14,7 @@ app.on('activate', () => {
 });
 
 function createWindow() {
+  fileService();
   win = new BrowserWindow({
     width: 800,
     height: 600,
@@ -22,7 +23,7 @@ function createWindow() {
 
   win.loadURL(
     url.format({
-      pathname: path.join(__dirname, `/../../dist/i18n-supporter/index.html`),
+      pathname: joinPath(__dirname, `/../../dist/i18n-supporter/index.html`),
       protocol: 'file:',
       slashes: true
     })
@@ -34,8 +35,3 @@ function createWindow() {
     win = null;
   });
 }
-
-ipcMain.on('getFiles', (event, arg) => {
-  const files = fs.readdirSync(__dirname);
-  win.webContents.send('getFilesResponse', files);
-});

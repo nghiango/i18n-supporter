@@ -1,11 +1,23 @@
 import {Injectable} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
 import {Subject} from 'rxjs';
+import { IpcRenderer } from 'electron';
+import { resolve } from 'url';
 
 @Injectable()
 export class FileService {
+  private ipc: IpcRenderer;
 
-  constructor() { }
+  constructor() {
+    if ((<any>window).require) {
+      try {
+        this.ipc = (<any>window).require('electron').ipcRenderer;
+      } catch (error) {
+        throw error;
+      }
+    } else {
+      console.warn('Could not load electron ipc');
+    }
+  }
 
   readContentOfFile(file: File) {
     const fileReader = new FileReader();
@@ -18,5 +30,11 @@ export class FileService {
     };
     fileReader.readAsText(file);
     return fileSub.asObservable();
+  }
+
+  readFile(file: File) {
+    console.log('into this');
+
+    this.ipc.send('file-readFile', 'test');
   }
 }
