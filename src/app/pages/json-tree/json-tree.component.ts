@@ -27,8 +27,8 @@ export class JsonTreeComponent implements OnInit {
   private currentJsonNodes: JsonNode[];
   private editNumber = '';
   constructor(
-    private jsonService: JsonService,
-    private fileService: FileService,
+    public jsonService: JsonService,
+    public fileService: FileService,
     public dialog: MatDialog,
   ) {}
 
