@@ -1,7 +1,7 @@
 import { app, BrowserWindow } from 'electron';
 import * as url from 'url';
 import { joinPath } from './services/path.service';
-import fileService from './services/file.service';
+import registerEvents from './services/ipc-main.service';
 
 let win: BrowserWindow;
 
@@ -12,9 +12,13 @@ app.on('activate', () => {
     createWindow();
   }
 });
+/*
+* Register all events of ipcMain to catch event from angular
+*/
+console.log('Class: , Line 18 : What the fuck');
+registerEvents();
 
 function createWindow() {
-  fileService();
   win = new BrowserWindow({
     width: 800,
     height: 600,
@@ -23,7 +27,7 @@ function createWindow() {
 
   win.loadURL(
     url.format({
-      pathname: joinPath(__dirname, `/../../dist/i18n-supporter/index.html`),
+      pathname: joinPath(__dirname, `/../../../../dist/i18n-supporter/index.html`),
       protocol: 'file:',
       slashes: true
     })

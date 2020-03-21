@@ -1,23 +1,14 @@
 import {Injectable} from '@angular/core';
 import {Subject} from 'rxjs';
-import { IpcRenderer } from 'electron';
-import { resolve } from 'url';
+import {IpcRendererService} from './ipc-renderer.service';
+import {IpcSignatureEnum} from '../../../global/ipc-signature.enum';
 
 @Injectable()
 export class FileService {
-  private ipc: IpcRenderer;
 
-  constructor() {
-    if ((<any>window).require) {
-      try {
-        this.ipc = (<any>window).require('electron').ipcRenderer;
-      } catch (error) {
-        throw error;
-      }
-    } else {
-      console.warn('Could not load electron ipc');
-    }
-  }
+  constructor(
+    private ipcRendererService: IpcRendererService
+  ) {}
 
   readContentOfFile(file: File) {
     const fileReader = new FileReader();
@@ -32,9 +23,8 @@ export class FileService {
     return fileSub.asObservable();
   }
 
-  readFile(file: File) {
-    console.log('into this');
-
-    this.ipc.send('file-readFile', 'test');
+  public readFile(file: File): Promise<any> {
+    this.ipcRendererService.sendRequest(IpcSignatureEnum.READ_FILE, file);
+    return this.ipcRendererService.getResponse(IpcSignatureEnum.READ_FILE_RESPONSE);
   }
 }
