@@ -8,7 +8,7 @@ export class FileApiService {
     return this.fileApiService;
   }
 
-  public readFile() {
-    console.log('Class: FileApiService, Line 13 : ');
+  public readFile(data) {
+    console.log('Class: FileApiService, Line 13 : ', data);
   }
 }
