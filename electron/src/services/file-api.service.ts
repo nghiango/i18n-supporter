@@ -1,3 +1,8 @@
+import * as fs from 'fs-extra';
+import { BrowserWindow } from 'electron';
+import IpcMainEvent = Electron.IpcMainEvent;
+import {IpcSignatureEnum} from '../../../global/ipc-signature.enum';
+
 export class FileApiService {
   private static fileApiService: FileApiService;
   constructor() {}
@@ -8,7 +13,12 @@ export class FileApiService {
     return this.fileApiService;
   }
 
-  public readFile(data) {
-    console.log('Class: FileApiService, Line 13 : ', data);
+  public readFile(event: IpcMainEvent, filePath) {
+    const fileContent = fs.readFileSync(filePath, 'utf8');
+    const window = BrowserWindow.fromWebContents(event.sender);
+    window.webContents.send(IpcSignatureEnum.READ_FILE_RESPONSE, fileContent);
+  }
+  public readFolder(folderPath: string) {
+
   }
 }

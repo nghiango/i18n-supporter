@@ -15,13 +15,12 @@ app.on('activate', () => {
 /*
 * Register all events of ipcMain to catch event from angular
 */
-console.log('Class: , Line 18 : What the fuck');
 registerEvents();
 
 function createWindow() {
   win = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 1200,
+    height: 768,
     webPreferences: { nodeIntegration: true }
   });
 

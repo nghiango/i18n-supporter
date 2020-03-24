@@ -23,8 +23,8 @@ export class FileService {
     return fileSub.asObservable();
   }
 
-  public readFile(file: File): Promise<any> {
-    this.ipcRendererService.sendRequest(IpcSignatureEnum.READ_FILE, file);
+  public readFile(filePath: string): Promise<any> {
+    this.ipcRendererService.sendRequest(IpcSignatureEnum.READ_FILE, filePath);
     return this.ipcRendererService.getResponse(IpcSignatureEnum.READ_FILE_RESPONSE);
   }
 }

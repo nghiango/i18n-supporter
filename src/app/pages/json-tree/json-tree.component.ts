@@ -72,7 +72,6 @@ export class JsonTreeComponent implements OnInit {
     const fileImports: File[] = Array.from($event.target.files);
     let count = 0;
     fileImports.forEach(file => {
-      this.fileService.readFile(file);
       this.fileService.readContentOfFile(file).toPromise().then(content => {
         const jsonObject = this.jsonService.parseToJson(content);
         // const jsonDictionary = this.jsonService.buildDictionary(jsonObject, '', {});
