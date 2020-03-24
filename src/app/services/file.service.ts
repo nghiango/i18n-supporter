@@ -1,11 +1,14 @@
 import {Injectable} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
 import {Subject} from 'rxjs';
+import {IpcRendererService} from './ipc-renderer.service';
+import {IpcSignatureEnum} from '../../../global/ipc-signature.enum';
 
 @Injectable()
 export class FileService {
 
-  constructor() { }
+  constructor(
+    private ipcRendererService: IpcRendererService
+  ) {}
 
   readContentOfFile(file: File) {
     const fileReader = new FileReader();
@@ -18,5 +21,10 @@ export class FileService {
     };
     fileReader.readAsText(file);
     return fileSub.asObservable();
+  }
+
+  public readFile(filePath: string): Promise<any> {
+    this.ipcRendererService.sendRequest(IpcSignatureEnum.READ_FILE, filePath);
+    return this.ipcRendererService.getResponse(IpcSignatureEnum.READ_FILE_RESPONSE);
   }
 }
