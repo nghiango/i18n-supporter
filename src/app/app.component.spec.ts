@@ -16,16 +16,16 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it(`should have as title 'json-diff'`, () => {
+  it(`should have as title 'i18n-supporter'`, () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.debugElement.componentInstance;
-    expect(app.title).toEqual('json-diff');
+    expect(app.title).toEqual('i18n-supporter');
   });
 
   it('should render title in a h1 tag', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
     const compiled = fixture.debugElement.nativeElement;
-    expect(compiled.querySelector('h1').textContent).toContain('Welcome to json-diff!');
+    expect(compiled.querySelector('h1').textContent).toContain('Welcome to i18n-supporter!');
   });
 });
