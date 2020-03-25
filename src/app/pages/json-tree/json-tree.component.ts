@@ -72,7 +72,7 @@ export class JsonTreeComponent implements OnInit {
     const fileImports: File[] = Array.from($event.target.files);
     let count = 0;
     fileImports.forEach(file => {
-      this.fileService.readContentOfFile(file).toPromise().then(content => {
+      this.fileService.readFile(file.path).then(content => {
         const jsonObject = this.jsonService.parseToJson(content);
         // const jsonDictionary = this.jsonService.buildDictionary(jsonObject, '', {});
         const jsonDictionary = flatten(jsonObject);
@@ -231,5 +231,13 @@ export class JsonTreeComponent implements OnInit {
     this.currentNode = null;
     this.files = [];
     this.updateJsonTreeData(this.currentJsonNodes);
+  }
+
+  saveFile() {
+    this.files.forEach(file => file.nestedJsonContent = this.jsonService.buildJson(file.jsonDictionary));
+    const firstFile = this.files[0];
+    const content = this.jsonService.formatJsonString(firstFile.nestedJsonContent);
+    const path = '/mnt/workspace/projects/i18n/i18n-supporter/src/assets/jsonFiles/testWrite.json';
+    this.fileService.saveFile({path: path, content: content});
   }
 }

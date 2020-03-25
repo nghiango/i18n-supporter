@@ -18,7 +18,14 @@ export class FileApiService {
     const window = BrowserWindow.fromWebContents(event.sender);
     window.webContents.send(IpcSignatureEnum.READ_FILE_RESPONSE, fileContent);
   }
+
   public readFolder(folderPath: string) {
 
+  }
+
+  public saveFile(event: IpcMainEvent, data) {
+    const filePath = data['path'];
+    const content = data['content'];
+    fs.writeFileSync(filePath, content);
   }
 }
