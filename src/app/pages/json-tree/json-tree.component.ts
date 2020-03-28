@@ -1,7 +1,7 @@
-import { JsonFlat } from './../../models/json-flat';
+import {JsonFlat} from '../../models/json-flat';
 import {Component, OnInit, ViewChild} from '@angular/core';
-import {NestedTreeControl, FlatTreeControl} from '@angular/cdk/tree';
-import {MatDialog, MatTreeNestedDataSource, MatTreeFlatDataSource, MatTreeFlattener} from '@angular/material';
+import {FlatTreeControl} from '@angular/cdk/tree';
+import {MatDialog, MatTreeFlatDataSource, MatTreeFlattener} from '@angular/material';
 import {JsonNode} from '../../models/json-node';
 import {JsonService} from '../../services/json.service';
 import {FormControl} from '@angular/forms';
