@@ -1,3 +1,5 @@
+import {IpcData} from '../models/ipc-data';
+
 export type IBuilder<T> = {
   [k in keyof T]: (arg: T[k]) => IBuilder<T>
 } & { build(): T };
@@ -16,4 +18,16 @@ export function Builder<T>(template?: Clazz<T>): IBuilder<T> {
     }
   });
   return builder as any;
+}
+
+export function buildIpcData(data: any): IpcData {
+  const id = Date.now().toString() + getRandomInt();
+  return Builder(IpcData)
+    .id(id)
+    .data(data)
+    .build();
+}
+
+export function getRandomInt(max: number = 10000000) {
+  return Math.floor(Math.random() * Math.floor(max));
 }

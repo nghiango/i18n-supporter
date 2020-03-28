@@ -1,5 +1,4 @@
-import { JsonService } from './../../services/json.service';
-import { NewNode } from './../../models/new-node';
+import { JsonService } from '../../services/json.service';
 import { FormControl, Validators } from '@angular/forms';
 import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
