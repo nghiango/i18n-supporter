@@ -2,6 +2,8 @@ import * as fs from 'fs-extra';
 import { BrowserWindow } from 'electron';
 import IpcMainEvent = Electron.IpcMainEvent;
 import {IpcSignatureEnum} from '../../../global/ipc-signature.enum';
+import {IpcData} from '../../../src/app/models/ipc-data';
+import {Builder} from '../../../src/app/shared/buider';
 
 export class FileApiService {
   private static fileApiService: FileApiService;
@@ -13,14 +15,17 @@ export class FileApiService {
     return this.fileApiService;
   }
 
-  public readFile(event: IpcMainEvent, filePath) {
-    const fileContent = fs.readFileSync(filePath, 'utf8');
+  public readFile(event: IpcMainEvent, ipcData: IpcData) {
+    const path = ipcData.data;
+    const fileContent = fs.readFileSync(path, 'utf8');
+
+    const ipcDataResponse =
+      Builder(IpcData)
+        .id(ipcData.id)
+        .data(fileContent)
+        .build();
     const window = BrowserWindow.fromWebContents(event.sender);
-    window.webContents.send(IpcSignatureEnum.READ_FILE_RESPONSE, fileContent);
-  }
-
-  public readFolder(folderPath: string) {
-
+    window.webContents.send(`${IpcSignatureEnum.READ_FILE_RESPONSE}${ipcData.id}`, ipcDataResponse);
   }
 
   public saveFile(event: IpcMainEvent, data) {
