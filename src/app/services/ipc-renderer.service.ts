@@ -1,5 +1,6 @@
 import {Injectable} from '@angular/core';
 import {IpcRenderer} from 'electron';
+import {IpcData} from '../models/ipc-data';
 
 @Injectable({
   providedIn: 'root'
@@ -19,15 +20,15 @@ export class IpcRendererService {
     }
   }
 
-  public sendRequest(eventSignature: string, data): void{
+  public sendRequest(eventSignature: string, data: IpcData): void {
     this.ipcRenderer.send(eventSignature, data);
   }
 
-  public getResponse(eventSignature: string): Promise<any> {
+  public getResponse(eventSignature: string, ipcData: IpcData): Promise<any> {
     return new Promise<any>((resolve, reject) => {
-      this.ipcRenderer.once(eventSignature, (event, args) => {
-        if (args) {
-          resolve(args);
+      this.ipcRenderer.once(`${eventSignature}${ipcData.id}`, (event, response) => {
+        if (response) {
+          resolve(response.data);
         }
       });
     });

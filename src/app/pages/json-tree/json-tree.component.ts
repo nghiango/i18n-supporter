@@ -6,10 +6,10 @@ import {JsonService} from '../../services/json.service';
 import {FormControl} from '@angular/forms';
 import {FileService} from '../../services/file.service';
 import {FileDto} from '../../models/file-dto';
-import {isNullOrUndefined, log} from 'util';
+import {isNullOrUndefined} from 'util';
 import {AddKeyDialogComponent} from '../../components/add-key-dialog/add-key-dialog.component';
 import {CdkTextareaAutosize} from '@angular/cdk/text-field';
-import { flatten, unflatten } from 'flat';
+import {flatten, unflatten} from 'flat';
 
 @Component({
   selector: 'json-json-tree',
@@ -72,12 +72,12 @@ export class JsonTreeComponent implements OnInit {
     const fileImports: File[] = Array.from($event.target.files);
     let count = 0;
     fileImports.forEach(file => {
-      this.fileService.readContentOfFile(file).toPromise().then(content => {
+
+      this.fileService.readFile(file.path).then(content => {
         const jsonObject = this.jsonService.parseToJson(content);
-        // const jsonDictionary = this.jsonService.buildDictionary(jsonObject, '', {});
         const jsonDictionary = flatten(jsonObject);
 
-        const fileDto = new FileDto(file.name, jsonDictionary, new FormControl());
+        const fileDto = new FileDto(file.path, file.name, jsonDictionary, new FormControl());
         this.files.push(fileDto);
         this.initJsonTree(jsonObject, Object.assign({}, jsonDictionary));
         count++;
@@ -231,5 +231,12 @@ export class JsonTreeComponent implements OnInit {
     this.currentNode = null;
     this.files = [];
     this.updateJsonTreeData(this.currentJsonNodes);
+  }
+
+  saveFile() {
+    this.files.forEach(file => {
+      file.nestedJsonContent = this.jsonService.buildJson(file.jsonDictionary);
+      this.fileService.saveFile({path: file.path, content: this.jsonService.formatJsonString(file.nestedJsonContent)});
+    });
   }
 }

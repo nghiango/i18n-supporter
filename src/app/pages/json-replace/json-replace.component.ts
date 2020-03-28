@@ -38,7 +38,7 @@ export class JsonReplaceComponent implements OnInit {
 
   handleFileInput(event, textAreaContent: TextAreaFileContent) {
     this.file = event.target.files[0];
-    this.fileService.readContentOfFile(this.file).toPromise().then(content => {
+    this.fileService.readFile(this.file.path).then(content => {
       textAreaContent.formControl.setValue(content);
       event.target.value = '';
     });

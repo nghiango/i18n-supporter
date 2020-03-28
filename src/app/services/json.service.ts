@@ -3,7 +3,9 @@ import {JsonNode} from '../models/json-node';
 import {FormControl, Validators} from '@angular/forms';
 import {Builder} from '../shared/buider';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class JsonService {
 
   constructor() { }
@@ -115,7 +117,7 @@ export class JsonService {
   public getCombinePath(name: string, path: string): string {
     const pathArr = path.split('.');
     if (pathArr[pathArr.length - 1] !== '') {
-      return path.substring(0, path.lastIndexOf('.') - 1) + `.${name}`;
+      return path.substring(0, path.lastIndexOf('.')) + `.${name}`;
     }
     let newPath = '';
     for (let i = 0; i < (pathArr.length - 1); i++) {
