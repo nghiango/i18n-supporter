@@ -43,8 +43,6 @@ function getNodeChildren({children}: JsonNode) {
 export class JsonTreeComponent implements OnInit {
   public currentNode: JsonNode;
   public files: FileDto[] = [];
-  // public treeControl = new NestedTreeControl<JsonNode>(node => node.children);
-  // public dataSource = new MatTreeNestedDataSource<JsonNode>();
   public treeControl = new FlatTreeControl<JsonFlat>(getNodeLevel, getIsNodeExpandable);
   public dataSource: MatTreeFlatDataSource<JsonNode, JsonFlat>;
   public isReviewMode: boolean;
@@ -52,6 +50,19 @@ export class JsonTreeComponent implements OnInit {
   private currentNestedJson: Object;
   private currentJsonNodes: JsonNode[];
   private editNumber = '';
+  private toTest = {
+    'components': {
+      'duplicateOverlay': {
+        'gender': 'Gender'
+      }
+    },
+    'profile': {
+      'person': {
+        'name': 'Nghia'
+      }
+    }
+  };
+
   constructor(
     public jsonService: JsonService,
     public fileService: FileService,
@@ -60,8 +71,16 @@ export class JsonTreeComponent implements OnInit {
 
   @ViewChild('autosize', { static: false }) autosize: CdkTextareaAutosize;
 
-  ngOnInit() {}
-  hasChild = (_: number, node: JsonNode) => !!node.children && node.children.length > 0;
+  ngOnInit() {
+    if (this.toTest) {
+      const jsonDictionary = flatten(this.toTest);
+
+      const fileDto = new FileDto('test', 'test', jsonDictionary, new FormControl());
+      this.files.push(fileDto);
+      this.initJsonTree(this.toTest, Object.assign({}, jsonDictionary));
+      this.updateJsonTreeData(this.currentJsonNodes);
+    }
+  }
 
   openNode(node: JsonNode) {
     this.toggleNode(node);
@@ -98,7 +117,6 @@ export class JsonTreeComponent implements OnInit {
     const fileImports: File[] = Array.from($event.target.files);
     let count = 0;
     fileImports.forEach(file => {
-
       this.fileService.readFile(file.path).then(content => {
         const jsonObject = this.jsonService.parseToJson(content);
         const jsonDictionary = flatten(jsonObject);
@@ -128,7 +146,6 @@ export class JsonTreeComponent implements OnInit {
   }
 
   private updateJsonTreeData(jsonNodes: JsonNode[]) {
-    // console.log(jsonNodes);
     const treeFlatener = new MatTreeFlattener<JsonNode, JsonFlat>(
       nodeTransformer,
       getNodeLevel,
@@ -136,7 +153,6 @@ export class JsonTreeComponent implements OnInit {
       getNodeChildren
     );
     this.dataSource = new MatTreeFlatDataSource(this.treeControl, treeFlatener);
-    // this.dataSource.data = null;
     this.dataSource.data = jsonNodes;
   }
 

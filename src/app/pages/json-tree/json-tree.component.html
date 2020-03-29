@@ -1,5 +1,5 @@
-<mat-sidenav-container class="example-container">
-  <mat-sidenav mode="side" opened style="width: 20%" #sidenav>
+<mat-sidenav-container class="json-tree">
+  <mat-sidenav mode="side" opened class="json-tree__sidenav" #sidenav>
     <div class="json-tree__menu">
       <button mat-flat-button color="primary" [matMenuTriggerFor]="menu">Menu</button>
       <mat-menu #menu="matMenu">
@@ -16,15 +16,23 @@
              multiple>
     </div>
 
-    <cdk-virtual-scroll-viewport class="virtual-scroll-container" itemSize="18">
+    <cdk-virtual-scroll-viewport class="json-tree__virtual-scroll-container" itemSize="18">
       <ng-container *cdkVirtualFor="let node of dataSource">
         <!-- Note that the [style.padding-left] is essentially what cdkTreeNodePadding is doing under the hood -->
-        <div class="node" [style.padding-left]="node.level * 24 + 'px'">
+        <div class="json-tree__node" [style.padding-left]="node.level * 24 + 'px'">
           <!-- Note that treeControl.toggle(node) is essentially what cdkTreeNodeToggle is doing under the hood -->
-          <button (click)="treeControl.toggle(node)" *ngIf="node.hasChildren">
-            {{ treeControl.isExpanded(node) ? '-' : '+' }}
-          </button>
-          {{ node.name }}
+          <a (click)="treeControl.toggle(node)">
+            <span *ngIf="node.hasChildren" class="json-tree__expandable">
+              <mat-icon *ngIf="treeControl.isExpanded(node)">arrow_drop_down</mat-icon>
+              <mat-icon *ngIf="!treeControl.isExpanded(node)">arrow_right</mat-icon>
+              {{ node.name }}
+            </span>
+            <span *ngIf="!node.hasChildren" class="json-tree__leaf">
+              {{ node.name }}
+            </span>
+          </a>
+
+
         </div>
       </ng-container>
     </cdk-virtual-scroll-viewport>

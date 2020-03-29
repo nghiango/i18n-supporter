@@ -1,13 +1,33 @@
-.virtual-scroll-container {
-  height: 94%;
-  overflow: auto;
-}
-
-cdk-tree-node {
-  display: block;
-}
-
 .json-tree {
+
+  position: absolute;
+  top: 45px;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #eee;
+
+  &__sidenav {
+    width: 300px;
+  }
+
+  &__virtual-scroll-container {
+    height: 94%;
+    overflow: auto;
+  }
+
+  &__leaf {
+    padding-left: 24px;
+  }
+
+  &__expandable {
+    display: flex;
+  }
+
+  &__node {
+    padding-top: 5px;
+    padding-bottom: 5px;
+  }
 
   &__content {
     padding: 25px 3%;
@@ -47,21 +67,4 @@ cdk-tree-node {
     color: #1b14ff !important;
   }
 }
-.example-tree-invisible {
-  display: none;
-}
 
-.example-tree ul,
-.example-tree li {
-  margin-top: 0;
-  margin-bottom: 0;
-  list-style-type: none;
-}
-.example-container {
-  position: absolute;
-  top: 45px;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: #eee;
-}
