@@ -11,6 +11,7 @@ import {isNullOrUndefined} from 'util';
 import {AddKeyDialogComponent} from '../../components/add-key-dialog/add-key-dialog.component';
 import {CdkTextareaAutosize} from '@angular/cdk/text-field';
 import {flatten, unflatten} from 'flat';
+import {oc} from 'ts-optchain';
 
 function nodeTransformer(node: JsonNode, level: number) {
   return {
@@ -26,7 +27,7 @@ function getNodeLevel({level}: JsonFlat) {
 }
 
 // Function that determines whether a flat node is expandable or not
-function getIsNodeExpandable({hasChildren}: JsonFlat) {
+function getIsNodeExpandable({hasChildren }: JsonFlat) {
   return hasChildren;
 }
 
@@ -146,13 +147,13 @@ export class JsonTreeComponent implements OnInit {
   }
 
   private updateJsonTreeData(jsonNodes: JsonNode[]) {
-    const treeFlatener = new MatTreeFlattener<JsonNode, JsonFlat>(
+    const treeFlattener = new MatTreeFlattener<JsonNode, JsonFlat>(
       nodeTransformer,
       getNodeLevel,
       getIsNodeExpandable,
       getNodeChildren
     );
-    this.dataSource = new MatTreeFlatDataSource(this.treeControl, treeFlatener);
+    this.dataSource = new MatTreeFlatDataSource(this.treeControl, treeFlattener);
     this.dataSource.data = jsonNodes;
   }
 
