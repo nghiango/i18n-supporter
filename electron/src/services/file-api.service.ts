@@ -28,7 +28,8 @@ export class FileApiService {
     window.webContents.send(`${IpcSignatureEnum.READ_FILE_RESPONSE}${ipcData.id}`, ipcDataResponse);
   }
 
-  public saveFile(event: IpcMainEvent, data) {
+  public saveFile(event: IpcMainEvent, ipcData: IpcData) {
+    const data = ipcData.data;
     const filePath = data['path'];
     const content = data['content'];
     fs.writeFileSync(filePath, content);

@@ -102,7 +102,10 @@ export class JsonService {
   }
 
   public formatJsonString(nestedJsonContent: {})  {
-    return JSON.stringify(nestedJsonContent, null, 4);
+    /*
+    Task: Should add configuration for the format json
+    */
+    return JSON.stringify(nestedJsonContent, null, '\t');
   }
 
   public mergeKeys(currentJsonDictionary: Object, newJsonDictionary: Object) {
