@@ -1,41 +1,45 @@
 <mat-sidenav-container class="json-tree">
   <mat-sidenav mode="side" opened class="json-tree__sidenav" #sidenav>
-    <div class="json-tree__menu">
-      <button mat-flat-button color="primary" [matMenuTriggerFor]="menu">Menu</button>
-      <mat-menu #menu="matMenu">
-        <button mat-menu-item (click)="fileImport.click()">Import</button>
-        <button mat-menu-item (click)="saveFile()">Save</button>
-        <button mat-menu-item (click)="reviewFiles()">Review</button>
-        <button mat-menu-item (click)="clearAll()">Clear</button>
-      </mat-menu>
+    <div class="json-tree__sidenav-header">
+      <input type="text" placeholder="node name" id="filterNode" [formControl]="filterControl"/>
+      <div class="json-tree__menu-btn">
+        <button mat-flat-button color="primary" [matMenuTriggerFor]="menu">Menu</button>
+        <mat-menu #menu="matMenu">
+          <button mat-menu-item (click)="fileImport.click()">Import</button>
+          <button mat-menu-item (click)="saveFile()">Save</button>
+          <button mat-menu-item (click)="reviewFiles()">Review</button>
+          <button mat-menu-item (click)="clearAll()">Clear</button>
+        </mat-menu>
 
-      <input type="file" [hidden]="true" #fileImport
-             id="file"
-             (change)="handleFileInput($event)"
-             placeholder="Choose File"
-             multiple>
+        <input type="file" [hidden]="true" #fileImport
+               id="file"
+               (change)="handleFileInput($event)"
+               placeholder="Choose File"
+               multiple/>
+      </div>
     </div>
 
-    <cdk-virtual-scroll-viewport class="json-tree__virtual-scroll-container" itemSize="18">
+    <cdk-virtual-scroll-viewport class="json-tree__virtual-scroll-container" itemSize="18" oncontextmenu="return false;">
       <ng-container *cdkVirtualFor="let node of dataSource">
         <!-- Note that the [style.padding-left] is essentially what cdkTreeNodePadding is doing under the hood -->
         <div class="json-tree__node" [style.padding-left]="node.level * 24 + 'px'">
           <!-- Note that treeControl.toggle(node) is essentially what cdkTreeNodeToggle is doing under the hood -->
-          <a (click)="treeControl.toggle(node)">
+          <a (click)="openNodeFlat(node)" (contextmenu)="onRightClick($event)">
             <span *ngIf="node.hasChildren" class="json-tree__expandable">
               <mat-icon *ngIf="treeControl.isExpanded(node)">arrow_drop_down</mat-icon>
               <mat-icon *ngIf="!treeControl.isExpanded(node)">arrow_right</mat-icon>
               {{ node.name }}
             </span>
-            <span *ngIf="!node.hasChildren" class="json-tree__leaf">
+            <span *ngIf="!node.hasChildren" class="json-tree__leaf" [ngClass]="{'json-tree--active': node.selected}">
               {{ node.name }}
             </span>
           </a>
-
-
         </div>
       </ng-container>
     </cdk-virtual-scroll-viewport>
+    <div *ngIf="contextMenu==true">
+      <json-context-menu [top]="contextMenuY"></json-context-menu>
+    </div>
 
   </mat-sidenav>
   <mat-sidenav-content>

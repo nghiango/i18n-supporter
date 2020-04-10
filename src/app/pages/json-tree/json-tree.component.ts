@@ -1,23 +1,26 @@
-import {JsonFlat} from '../../models/json-flat';
-import {Component, OnInit, ViewChild} from '@angular/core';
-import {FlatTreeControl} from '@angular/cdk/tree';
-import {MatDialog, MatTreeFlatDataSource, MatTreeFlattener} from '@angular/material';
-import {JsonNode} from '../../models/json-node';
-import {JsonService} from '../../services/json.service';
-import {FormControl} from '@angular/forms';
-import {FileService} from '../../services/file.service';
-import {FileDto} from '../../models/file-dto';
-import {isNullOrUndefined} from 'util';
-import {AddKeyDialogComponent} from '../../components/add-key-dialog/add-key-dialog.component';
-import {CdkTextareaAutosize} from '@angular/cdk/text-field';
-import {flatten, unflatten} from 'flat';
-import {oc} from 'ts-optchain';
+import { JsonFlat } from '../../models/json-flat';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { FlatTreeControl } from '@angular/cdk/tree';
+import { MatDialog, MatTreeFlatDataSource, MatTreeFlattener } from '@angular/material';
+import { JsonNode } from '../../models/json-node';
+import { JsonService } from '../../services/json.service';
+import { FormControl } from '@angular/forms';
+import { FileService } from '../../services/file.service';
+import { FileDto } from '../../models/file-dto';
+import { isNullOrUndefined } from 'util';
+import { AddKeyDialogComponent } from '../../components/add-key-dialog/add-key-dialog.component';
+import { CdkTextareaAutosize } from '@angular/cdk/text-field';
+import { flatten, unflatten } from 'flat';
+import { oc } from 'ts-optchain';
+import { BehaviorSubject } from 'rxjs';
 
 function nodeTransformer(node: JsonNode, level: number) {
   return {
     name: node.name,
     level,
     hasChildren: node.children ? node.children.length > 0 : false,
+    path: node.path,
+    selected: node.selected
   };
 }
 
@@ -27,7 +30,7 @@ function getNodeLevel({level}: JsonFlat) {
 }
 
 // Function that determines whether a flat node is expandable or not
-function getIsNodeExpandable({hasChildren }: JsonFlat) {
+function getIsNodeExpandable({hasChildren}: JsonFlat) {
   return hasChildren;
 }
 
@@ -42,7 +45,7 @@ function getNodeChildren({children}: JsonNode) {
   styleUrls: ['./json-tree.component.scss']
 })
 export class JsonTreeComponent implements OnInit {
-  public currentNode: JsonNode;
+  public currentNode: JsonFlat;
   public files: FileDto[] = [];
   public treeControl = new FlatTreeControl<JsonFlat>(getNodeLevel, getIsNodeExpandable);
   public dataSource: MatTreeFlatDataSource<JsonNode, JsonFlat>;
@@ -51,6 +54,7 @@ export class JsonTreeComponent implements OnInit {
   private currentNestedJson: Object;
   private currentJsonNodes: JsonNode[];
   private editNumber = '';
+  public filterControl = new FormControl();
   private toTest = {
     'components': {
       'duplicateOverlay': {
@@ -63,16 +67,27 @@ export class JsonTreeComponent implements OnInit {
       }
     }
   };
+  private treeFlattener = new MatTreeFlattener<JsonNode, JsonFlat>(
+    nodeTransformer,
+    getNodeLevel,
+    getIsNodeExpandable,
+    getNodeChildren
+  );
+  private contextMenuX: number;
+  private contextMenuY: number;
+  private contextMenu: boolean;
 
   constructor(
     public jsonService: JsonService,
     public fileService: FileService,
     public dialog: MatDialog,
-  ) {}
+  ) {
+  }
 
-  @ViewChild('autosize', { static: false }) autosize: CdkTextareaAutosize;
+  @ViewChild('autosize', {static: false}) autosize: CdkTextareaAutosize;
 
   ngOnInit() {
+    this.filterControl.valueChanges.subscribe(value => console.log(value));
     if (this.toTest) {
       const jsonDictionary = flatten(this.toTest);
 
@@ -85,22 +100,22 @@ export class JsonTreeComponent implements OnInit {
 
   openNode(node: JsonNode) {
     this.toggleNode(node);
-    this.currentNode = node;
+    // this.currentNode = node;
     this.isReviewMode = false;
-    this.updateValueFormControl(this.files, this.currentNode);
+    this.updateValueFormControl(this.files, this.currentNode.path);
   }
 
   private toggleNode(node: JsonNode) {
     if (this.currentNode) {
-      this.currentNode.selected = false;
+      // this.currentNode.selected = false;
     }
     node.selected = true;
   }
 
-  private updateValueFormControl(files: FileDto[], jsonNode: JsonNode) {
+  private updateValueFormControl(files: FileDto[], path: string) {
     files.forEach(file => {
-      file.formControl.setValue(file.jsonDictionary[jsonNode.path]);
-      if (!(jsonNode.path in file.jsonDictionary)) {
+      file.formControl.setValue(file.jsonDictionary[path]);
+      if (!(path in file.jsonDictionary)) {
         file.notExisted = true;
         file.formControl.disable();
       } else {
@@ -147,13 +162,7 @@ export class JsonTreeComponent implements OnInit {
   }
 
   private updateJsonTreeData(jsonNodes: JsonNode[]) {
-    const treeFlattener = new MatTreeFlattener<JsonNode, JsonFlat>(
-      nodeTransformer,
-      getNodeLevel,
-      getIsNodeExpandable,
-      getNodeChildren
-    );
-    this.dataSource = new MatTreeFlatDataSource(this.treeControl, treeFlattener);
+    this.dataSource = new MatTreeFlatDataSource(this.treeControl, this.treeFlattener);
     this.dataSource.data = jsonNodes;
   }
 
@@ -171,7 +180,7 @@ export class JsonTreeComponent implements OnInit {
   }
 
   removeKey(node: JsonNode) {
-    this.currentNode = node;
+    // this.currentNode = node;
     this.files.forEach(file => {
       this.removeKeyInFile(file);
     });
@@ -249,7 +258,7 @@ export class JsonTreeComponent implements OnInit {
       if (jsonNodes[i].children) {
         const node = this.findNodeByPath(path, jsonNodes[i].children);
         if (node) {
-        return node;
+          return node;
         }
       }
     }
@@ -288,5 +297,26 @@ export class JsonTreeComponent implements OnInit {
       file.nestedJsonContent = this.jsonService.buildJson(file.jsonDictionary);
       this.fileService.saveFile({path: file.path, content: this.jsonService.formatJsonString(file.nestedJsonContent)});
     });
+  }
+
+  openNodeFlat(node: JsonFlat) {
+    this.treeControl.toggle(node);
+    if (!node.hasChildren) {
+      if (this.currentNode) {
+        this.currentNode.selected = false;
+      }
+      this.currentNode = node;
+      node.selected = true;
+      this.isReviewMode = false;
+      this.updateValueFormControl(this.files, node.path);
+    }
+  }
+
+  onRightClick(event: MouseEvent) {
+    console.log('Class: JsonTreeComponent, Line 316 : '
+    , event);
+    this.contextMenuX = event.clientX;
+    this.contextMenuY = event.clientY;
+    this.contextMenu = !this.contextMenu;
   }
 }
