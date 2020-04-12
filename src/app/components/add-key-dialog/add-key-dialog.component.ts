@@ -1,4 +1,3 @@
-import { JsonService } from '../../services/json.service';
 import { FormControl, Validators } from '@angular/forms';
 import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
@@ -15,14 +14,15 @@ export class AddKeyDialogComponent implements OnInit {
   public node: JsonFlat;
   public files: FileDto[];
   public nodeName = new FormControl();
+  public formControls = [];
   constructor(
     public dialogRef: MatDialogRef<AddKeyDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: Object,
-    public jsonService: JsonService
+    @Inject(MAT_DIALOG_DATA) public data: Object
   ) { }
 
   ngOnInit() {
     this.files = this.data['files'];
+    this.createFormArray(this.files);
     this.node = this.data['node'];
   }
 
@@ -33,13 +33,18 @@ export class AddKeyDialogComponent implements OnInit {
   addKey() {
     const nodePath = this.node.path;
     const path = `${this.getCurrentPath(this.node)}.${this.nodeName.value}`;
-    this.files.forEach(file => {
-      file.jsonDictionary[path] = file.formControl.value;
-      delete file.jsonDictionary[nodePath];
+    this.files.forEach((file, index) => {
+      file.jsonDictionary[path] = this.formControls[index].value;
+      if (!this.node.hasChildren) {
+        /* Remove value of key to change it to a node */
+        delete file.jsonDictionary[nodePath];
+        this.node.hasChildren = true;
+      }
     });
+    const nodeLevel = this.node.level + 1;
     const node = Builder(JsonFlat)
                   .name(this.nodeName.value)
-                  .level(++this.node.level)
+                  .level(nodeLevel)
                   .path(path)
                   .parentPath(this.node.path)
                   .formControl(new FormControl(this.nodeName.value, Validators.required))
@@ -52,5 +57,12 @@ export class AddKeyDialogComponent implements OnInit {
       this.node.path = `${node.path}.`;
     }
     return node.path.substring(0, node.path.lastIndexOf('.'));
+  }
+
+  private createFormArray(files: FileDto[]) {
+    const amountFile = files.length;
+    for (let i = 0; i < amountFile; i++) {
+      this.formControls.push(new FormControl());
+    }
   }
 }

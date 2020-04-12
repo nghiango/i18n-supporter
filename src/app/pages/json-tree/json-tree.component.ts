@@ -171,7 +171,9 @@ export class JsonTreeComponent implements OnInit {
         node: this.currentNode
       }
     }).afterClosed().subscribe(value => {
-      // this.currentJsonFlats.push(value);
+      if (!value) {
+        return;
+      }
       let parentIndex = this.currentJsonFlats.indexOf(this.currentNode);
       insert(this.currentJsonFlats, ++parentIndex, value);
       this.updateJsonTreeData(this.currentJsonFlats);
