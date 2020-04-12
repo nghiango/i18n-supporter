@@ -1,10 +1,10 @@
 import { JsonService } from '../../services/json.service';
 import { FormControl, Validators } from '@angular/forms';
-import {Component, Inject, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
-import {FileDto} from '../../models/file-dto';
-import {JsonNode} from '../../models/json-node';
+import { Component, Inject, OnInit } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
+import { FileDto } from '../../models/file-dto';
 import { Builder } from 'src/app/shared/buider';
+import { JsonFlat } from 'src/app/models/json-flat';
 
 @Component({
   selector: 'json-add-key-dialog',
@@ -12,7 +12,7 @@ import { Builder } from 'src/app/shared/buider';
   styleUrls: ['./add-key-dialog.component.scss']
 })
 export class AddKeyDialogComponent implements OnInit {
-  public node: JsonNode;
+  public node: JsonFlat;
   public files: FileDto[];
   public nodeName = new FormControl();
   constructor(
@@ -37,19 +37,18 @@ export class AddKeyDialogComponent implements OnInit {
       file.jsonDictionary[path] = file.formControl.value;
       delete file.jsonDictionary[nodePath];
     });
-    const node = Builder(JsonNode)
+    const node = Builder(JsonFlat)
                   .name(this.nodeName.value)
-                  .children([])
+                  .level(++this.node.level)
                   .path(path)
                   .parentPath(this.node.path)
                   .formControl(new FormControl(this.nodeName.value, Validators.required))
                   .build();
-    this.node.children.push(node);
     this.dialogRef.close();
   }
 
-  private getCurrentPath(node: JsonNode): string {
-    if (node.children.length === 0) {
+  private getCurrentPath(node: JsonFlat): string {
+    if (node.hasChildren) {
       this.node.path = `${node.path}.`;
     }
     return node.path.substring(0, node.path.lastIndexOf('.'));

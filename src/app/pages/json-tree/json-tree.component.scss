@@ -36,8 +36,12 @@
   }
 
   &__node {
-    padding-top: 5px;
-    padding-bottom: 5px;
+    display: flex;
+    align-items: center;
+    height: 40px;
+    &:hover {
+      background: #eaeaea8a;
+    }
   }
 
   &__content {

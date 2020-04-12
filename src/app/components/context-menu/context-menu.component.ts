@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 
 @Component({
   selector: 'json-context-menu',
@@ -9,6 +9,10 @@ export class ContextMenuComponent implements OnInit {
   public left: number;
   @Input() top: number;
 
+  @Output() addNodeEmitter = new EventEmitter<any>();
+  @Output() renameNodeEmitter = new EventEmitter<any>();
+  @Output() removeNodeEmitter = new EventEmitter<any>();
+
   constructor() { }
 
   ngOnInit() {
@@ -16,4 +20,15 @@ export class ContextMenuComponent implements OnInit {
     this.top -= 62;
   }
 
+  removeNode() {
+    this.removeNodeEmitter.next();
+  }
+
+  renameNode() {
+    this.renameNodeEmitter.next();
+  }
+
+  addNode() {
+    this.addNodeEmitter.next();
+  }
 }

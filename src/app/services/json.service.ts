@@ -1,7 +1,6 @@
 import {Injectable} from '@angular/core';
-import {JsonNode} from '../models/json-node';
-import {FormControl, Validators} from '@angular/forms';
 import {Builder} from '../shared/buider';
+import { JsonFlat } from 'src/app/models/json-flat';
 
 @Injectable({
   providedIn: 'root'
@@ -10,38 +9,26 @@ export class JsonService {
 
   constructor() { }
 
-  public buildJsonNodes(resource: Object, jsonNodes: JsonNode[], path: string) {
-    const tempPath = path;
-    const keys = Object.keys(resource);
-    if (keys.length > 0) {
-      for (let i = 0; i < keys.length; i++) {
-        if (typeof resource[keys[i]] !== 'string') {
-          if (Object.keys(resource[keys[i]]).length > 0) {
-            path += keys[i] + '.';
-            const node = Builder(JsonNode)
-              .name(keys[i])
-              .children([])
-              .path(path)
-              .parentPath(tempPath)
-              .formControl(new FormControl(keys[i], Validators.required))
-              .build();
-            node.children = this.buildJsonNodes(resource[keys[i]], [],  path);
-            jsonNodes.push(node);
-            path = tempPath;
-          }
-        } else {
-          const finalPath = path + keys[i];
-          const node = Builder(JsonNode)
-            .name(keys[i])
-            .path(finalPath)
-            .formControl(new FormControl(keys[i], Validators.required))
-            .parentPath(tempPath)
-            .build();
-          jsonNodes.push(node);
-        }
+  public buildJsonFlats(resource: Object, path: string, level: number, jsonFlats: any[]) {
+    const parentPath = path;
+    const rootLevel = level;
+    for (const key in resource) {
+      path += key;
+      if (this.isObject(resource[key])) {
+        const jsonFlat = this.addJsonFlat(jsonFlats, key, path, parentPath, level, true);
+        path = jsonFlat.path;
+        this.buildJsonFlats(resource[key], path, ++level, jsonFlats);
+      } else {
+        this.addJsonFlat(jsonFlats, key, path, parentPath, level);
       }
+      path = '';
+      level = rootLevel;
     }
-    return jsonNodes;
+    return jsonFlats;
+  }
+
+  public isObject(object) {
+    return object && typeof object === 'object';
   }
 
   public buildDictionary(resource: Object, path: string, jsonDictionary: Object) {
@@ -130,5 +117,21 @@ export class JsonService {
       }
       newPath += pathArr[i] + '.';
     }
+  }
+
+  private addJsonFlat = (jsonFlats, name: string, path: string, parentPath: string, level: number, hasChildren = false): JsonFlat => {
+    if (hasChildren) {
+      path += '.';
+    }
+    const jsonFlat =
+      Builder(JsonFlat)
+        .name(name)
+        .path(path)
+        .parentPath(parentPath)
+        .level(level)
+        .hasChildren(hasChildren)
+        .build();
+    jsonFlats.push(jsonFlat);
+    return jsonFlat;
   }
 }
