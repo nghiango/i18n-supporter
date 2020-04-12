@@ -44,11 +44,11 @@ export class AddKeyDialogComponent implements OnInit {
                   .parentPath(this.node.path)
                   .formControl(new FormControl(this.nodeName.value, Validators.required))
                   .build();
-    this.dialogRef.close();
+    this.dialogRef.close(node);
   }
 
   private getCurrentPath(node: JsonFlat): string {
-    if (node.hasChildren) {
+    if (!node.hasChildren) {
       this.node.path = `${node.path}.`;
     }
     return node.path.substring(0, node.path.lastIndexOf('.'));

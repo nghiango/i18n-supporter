@@ -11,6 +11,7 @@ import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { flatten, unflatten } from 'flat';
 import { Subscription } from 'rxjs';
 import { ArrayDataSource } from '@angular/cdk/collections';
+import { insert } from 'src/app/shared/arrays';
 
 @Component({
   selector: 'json-json-tree',
@@ -31,7 +32,8 @@ export class JsonTreeComponent implements OnInit {
   private toTest = {
     'components': {
       'duplicateOverlay': {
-        'gender': 'Gender'
+        'gender': 'Gender',
+        'what': 'asd'
       }
     },
     'profile': {
@@ -60,8 +62,6 @@ export class JsonTreeComponent implements OnInit {
     this.subscription.add(this.filterControl.valueChanges.subscribe(value => console.log(value)));
     if (this.toTest) {
       const jsonDictionary = flatten(this.toTest);
-console.log('Class: JsonTreeComponent, Line 92 : '
-, jsonDictionary);
       const fileDto = new FileDto('test', 'test', jsonDictionary, new FormControl());
       this.files.push(fileDto);
       this.initJsonTree(this.toTest, Object.assign({}, jsonDictionary));
@@ -77,7 +77,6 @@ console.log('Class: JsonTreeComponent, Line 92 : '
         childNodes[i].isExpanded = node.isExpanded;
       }
     }
-    console.log(this.currentJsonFlats);
   }
 
   private updateValueFormControl(files: FileDto[], path: string) {
@@ -130,8 +129,6 @@ console.log('Class: JsonTreeComponent, Line 92 : '
 
   private updateJsonTreeData(jsonFlats: JsonFlat[]) {
     this.dataSource = new ArrayDataSource(jsonFlats);
-    console.log('Class: JsonTreeComponent, Line 165 : '
-    , jsonFlats);
   }
 
   addKeyInFile(file: FileDto) {
@@ -154,6 +151,7 @@ console.log('Class: JsonTreeComponent, Line 92 : '
     this.currentJsonFlats = this.removeNode(this.currentNode, this.currentJsonFlats);
     this.updateJsonTreeData(this.currentJsonFlats);
     this.currentNode = null;
+    this.nodeHeader = '';
   }
 
   private removeNode = (node: JsonFlat, jsonFlats: JsonFlat[]): JsonFlat[] => {
@@ -172,7 +170,10 @@ console.log('Class: JsonTreeComponent, Line 92 : '
         files: this.files,
         node: this.currentNode
       }
-    }).afterClosed().subscribe(() => {
+    }).afterClosed().subscribe(value => {
+      // this.currentJsonFlats.push(value);
+      let parentIndex = this.currentJsonFlats.indexOf(this.currentNode);
+      insert(this.currentJsonFlats, ++parentIndex, value);
       this.updateJsonTreeData(this.currentJsonFlats);
     });
   }
@@ -301,8 +302,6 @@ console.log('Class: JsonTreeComponent, Line 92 : '
         break;
       }
     }
-    console.log('Class: JsonTreeComponent, Line 352 : '
-    , children);
     return children;
   }
 }

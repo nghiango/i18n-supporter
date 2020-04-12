@@ -51,7 +51,7 @@
   </mat-sidenav>
   <mat-sidenav-content>
     <button *ngIf="!sidenav.opened" mat-flat-button (click)="sidenav.toggle()">Open Sidenav</button>
-    <div class="json-tree__content" *ngIf="currentNode && !isReviewMode">
+    <div class="json-tree__content" *ngIf="currentNode && !isReviewMode && nodeHeader">
       <div class="json-tree__header">
         <h3>{{nodeHeader}}</h3>
         <mat-icon class="icon__medium icon--red item--clickable"

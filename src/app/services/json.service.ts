@@ -21,7 +21,7 @@ export class JsonService {
       } else {
         this.addJsonFlat(jsonFlats, key, path, parentPath, level);
       }
-      path = '';
+      path = parentPath;
       level = rootLevel;
     }
     return jsonFlats;
