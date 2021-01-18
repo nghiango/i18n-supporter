@@ -33,7 +33,7 @@ export class JsonTreeComponent implements OnInit {
     public dialog: MatDialog,
   ) {}
 
-  @ViewChild('autosize', { static: false }) autosize: CdkTextareaAutosize;
+  @ViewChild('autosize') autosize: CdkTextareaAutosize;
 
   ngOnInit() {}
   hasChild = (_: number, node: JsonNode) => !!node.children && node.children.length > 0;
