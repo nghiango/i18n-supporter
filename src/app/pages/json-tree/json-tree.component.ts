@@ -1,6 +1,7 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {NestedTreeControl} from '@angular/cdk/tree';
-import {MatDialog, MatTreeNestedDataSource} from '@angular/material';
+import { MatDialog } from '@angular/material/dialog';
+import { MatTreeNestedDataSource } from '@angular/material/tree';
 import {JsonNode} from '../../models/json-node';
 import {JsonService} from '../../services/json.service';
 import {FormControl} from '@angular/forms';

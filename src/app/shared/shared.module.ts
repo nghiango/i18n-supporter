@@ -5,7 +5,12 @@ import {MatInputModule} from '@angular/material/input';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {CommonModule} from '@angular/common';
 import {FileService} from '../services/file.service';
-import {MatDialogModule, MatExpansionModule, MatIconModule, MatMenuModule, MatSidenavModule, MatTreeModule} from '@angular/material';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatIconModule } from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatTreeModule } from '@angular/material/tree';
 import {JsonService} from '../services/json.service';
 
 @NgModule({
