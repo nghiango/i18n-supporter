@@ -1,6 +1,7 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {NestedTreeControl} from '@angular/cdk/tree';
-import {MatDialog, MatTreeNestedDataSource} from '@angular/material';
+import { MatDialog } from '@angular/material/dialog';
+import { MatTreeNestedDataSource } from '@angular/material/tree';
 import {JsonNode} from '../../models/json-node';
 import {JsonService} from '../../services/json.service';
 import {FormControl} from '@angular/forms';
@@ -32,7 +33,7 @@ export class JsonTreeComponent implements OnInit {
     public dialog: MatDialog,
   ) {}
 
-  @ViewChild('autosize', { static: false }) autosize: CdkTextareaAutosize;
+  @ViewChild('autosize') autosize: CdkTextareaAutosize;
 
   ngOnInit() {}
   hasChild = (_: number, node: JsonNode) => !!node.children && node.children.length > 0;

@@ -1,7 +1,7 @@
 import { JsonService } from '../../services/json.service';
 import { FormControl, Validators } from '@angular/forms';
 import {Component, Inject, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import {FileDto} from '../../models/file-dto';
 import {JsonNode} from '../../models/json-node';
 import { Builder } from 'src/app/shared/buider';
