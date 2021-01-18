@@ -1,6 +1,6 @@
 import { FormControl, Validators } from '@angular/forms';
 import { Component, Inject, OnInit } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { FileDto } from '../../models/file-dto';
 import { Builder } from 'src/app/shared/buider';
 import { JsonFlat } from 'src/app/models/json-flat';

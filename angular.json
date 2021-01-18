@@ -10,13 +10,17 @@
       "prefix": "json",
       "schematics": {
         "@schematics/angular:component": {
-          "styleext": "scss"
+          "style": "scss"
         }
       },
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
+            "allowedCommonJsDependencies": [
+              "flat"
+            ],
+            "aot": true,
             "outputPath": "dist/i18n-supporter",
             "index": "src/index.html",
             "main": "src/main.ts",
@@ -55,6 +59,10 @@
                   "type": "initial",
                   "maximumWarning": "2mb",
                   "maximumError": "5mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "6kb"
                 }
               ]
             }

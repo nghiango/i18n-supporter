@@ -1,17 +1,17 @@
 import { JsonFlat } from '../../models/json-flat';
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { MatDialog } from '@angular/material';
+import { MatDialog } from '@angular/material/dialog';
 import { JsonService } from '../../services/json.service';
 import { FormControl } from '@angular/forms';
 import { FileService } from '../../services/file.service';
 import { FileDto } from '../../models/file-dto';
-import { isNullOrUndefined } from 'util';
 import { AddKeyDialogComponent } from '../../components/add-key-dialog/add-key-dialog.component';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { flatten, unflatten } from 'flat';
 import { Subscription } from 'rxjs';
 import { ArrayDataSource } from '@angular/cdk/collections';
 import { insert } from 'src/app/shared/arrays';
+import { isNullOrUndefined } from 'src/app/services/util';
 
 @Component({
   selector: 'json-json-tree',
@@ -45,7 +45,7 @@ export class JsonTreeComponent implements OnInit {
 
   private contextMenuX: number;
   private contextMenuY: number;
-  private contextMenu: boolean;
+  public contextMenu: boolean;
 
   private subscription = new Subscription();
 
