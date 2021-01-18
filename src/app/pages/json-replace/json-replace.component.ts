@@ -2,8 +2,8 @@ import {Component, NgZone, OnInit, ViewChild} from '@angular/core';
 import {FileService} from '../../services/file.service';
 import {FormControl} from '@angular/forms';
 import {CdkTextareaAutosize} from '@angular/cdk/text-field';
-import {isNullOrUndefined} from 'util';
 import {JsonService} from '../../services/json.service';
+import { isNullOrUndefined } from 'src/app/services/util';
 
 class TextAreaFileContent {
   formControl: FormControl;

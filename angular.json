@@ -17,6 +17,9 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
+            "allowedCommonJsDependencies": [
+              "flat"
+            ],
             "aot": true,
             "outputPath": "dist/i18n-supporter",
             "index": "src/index.html",

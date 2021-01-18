@@ -7,10 +7,10 @@ import {JsonService} from '../../services/json.service';
 import {FormControl} from '@angular/forms';
 import {FileService} from '../../services/file.service';
 import {FileDto} from '../../models/file-dto';
-import {isNullOrUndefined} from 'util';
 import {AddKeyDialogComponent} from '../../components/add-key-dialog/add-key-dialog.component';
 import {CdkTextareaAutosize} from '@angular/cdk/text-field';
 import {flatten, unflatten} from 'flat';
+import { isNullOrUndefined } from 'src/app/services/util';
 
 @Component({
   selector: 'json-json-tree',
