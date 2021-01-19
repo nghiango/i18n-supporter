@@ -254,9 +254,7 @@ export class JsonTreeComponent implements OnInit {
     if (fileOptions.flatJson) {
       this.files.forEach(file => {
         const flattenJson = this.jsonService.buildFlattenJsonString(file.jsonDictionary, fileOptions);
-        console.log(flattenJson);
-
-        // this.fileService.saveFile({path: file.path, content: flattenJson});
+        this.fileService.saveFile({path: file.path, content: flattenJson});
       });
       return;
     }

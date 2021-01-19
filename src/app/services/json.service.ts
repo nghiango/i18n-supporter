@@ -74,9 +74,8 @@ export class JsonService {
     const reducer =
     (jsonString, currentKey) =>
     jsonString +=
-    `${quoteWrapper(fileOptions.doubleQuote, currentKey)}:
-    ${quoteWrapper(fileOptions.doubleQuote, jsonDictionary[currentKey])};\n`;
-    return Object.keys(jsonDictionary).reduce(reducer, '');
+    `${quoteWrapper(fileOptions.doubleQuote, currentKey)}: ${quoteWrapper(fileOptions.doubleQuote, jsonDictionary[currentKey])},\n`;
+    return `{\n${Object.keys(jsonDictionary).reduce(reducer, '')}}`;
   }
 
   /*
