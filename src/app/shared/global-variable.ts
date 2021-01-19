@@ -1,7 +1,12 @@
-import { Injectable } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
+import { FileOptions } from './../models/file-options';
+import { Builder } from './buider';
 
-@Injectable()
-export class GlobalVariable {
-  constructor() {
-  }
-}
+export const fileOptions = Builder(FileOptions)
+      .doubleQuote(false)
+      .flatJson(true)
+      .indentWidth(2)
+      .tab(true)
+      .build();
+
+export const currentPath = new BehaviorSubject('');

@@ -1,3 +1,11 @@
-<div class="header">
+<div class="header" *ngIf="!isDashBoard">
   <img src="assets/images/back-btn.png" alt="back-button" class="header__back-btn" (click)="backToDashBoard()">
+  <div *ngIf="isJsonTree" style="display: flex; margin-left: 200px;">
+    <section>
+      <mat-checkbox (change)="setDoubleQuote($event.checked)">Double quote</mat-checkbox>
+    </section>
+    <section>
+      <mat-checkbox (change)="setFlattenJson($event.checked)">Flatten JSON</mat-checkbox>
+    </section>
+  </div>
 </div>

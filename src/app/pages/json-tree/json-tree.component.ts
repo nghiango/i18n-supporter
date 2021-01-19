@@ -1,17 +1,19 @@
-import { JsonFlat } from '../../models/json-flat';
-import { Component, OnInit, ViewChild } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
-import { JsonService } from '../../services/json.service';
-import { FormControl } from '@angular/forms';
-import { FileService } from '../../services/file.service';
-import { FileDto } from '../../models/file-dto';
-import { AddKeyDialogComponent } from '../../components/add-key-dialog/add-key-dialog.component';
+import { ArrayDataSource } from '@angular/cdk/collections';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { FormControl } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
 import { flatten, unflatten } from 'flat';
 import { Subscription } from 'rxjs';
-import { ArrayDataSource } from '@angular/cdk/collections';
-import { insert } from 'src/app/shared/arrays';
 import { isNullOrUndefined } from 'src/app/services/util';
+import { insert } from 'src/app/shared/arrays';
+
+import { AddKeyDialogComponent } from '../../components/add-key-dialog/add-key-dialog.component';
+import { FileDto } from '../../models/file-dto';
+import { JsonFlat } from '../../models/json-flat';
+import { FileService } from '../../services/file.service';
+import { JsonService } from '../../services/json.service';
+import { currentPath, fileOptions } from './../../shared/global-variable';
 
 @Component({
   selector: 'json-json-tree',
@@ -59,6 +61,7 @@ export class JsonTreeComponent implements OnInit {
   @ViewChild('autosize', {static: false}) autosize: CdkTextareaAutosize;
 
   ngOnInit() {
+    currentPath.next('json-tree');
     this.subscription.add(this.filterControl.valueChanges.subscribe(value => console.log(value)));
     if (this.toTest) {
       const jsonDictionary = flatten(this.toTest);
@@ -248,6 +251,15 @@ export class JsonTreeComponent implements OnInit {
   }
 
   saveFile() {
+    if (fileOptions.flatJson) {
+      this.files.forEach(file => {
+        const flattenJson = this.jsonService.buildFlattenJsonString(file.jsonDictionary, fileOptions);
+        console.log(flattenJson);
+
+        // this.fileService.saveFile({path: file.path, content: flattenJson});
+      });
+      return;
+    }
     this.files.forEach(file => {
       file.nestedJsonContent = this.jsonService.buildJson(file.jsonDictionary);
       this.fileService.saveFile({path: file.path, content: this.jsonService.formatJsonString(file.nestedJsonContent)});

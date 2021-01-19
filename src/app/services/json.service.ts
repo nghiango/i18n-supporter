@@ -1,3 +1,5 @@
+import { quoteWrapper } from './util';
+import { FileOptions } from './../models/file-options';
 import {Injectable} from '@angular/core';
 import {Builder} from '../shared/buider';
 import { JsonFlat } from 'src/app/models/json-flat';
@@ -60,23 +62,37 @@ export class JsonService {
   }
 
   public buildJson(dictionary: {}) {
-    const newDictionary = {};
+    const jsonObject = {};
     Object.keys(dictionary).forEach(key => {
       const keyArr = key.split('.');
-      this.buildNestedNode(keyArr, newDictionary, dictionary[key], 0);
+      this.buildNestedNode(keyArr, jsonObject, dictionary[key], 0);
     });
-    return newDictionary;
+    return jsonObject;
   }
 
-  public buildNestedNode(keyArr: string[], newDictionary: {}, value: any, index: number) {
+  public buildFlattenJsonString(jsonDictionary: Object, fileOptions: FileOptions): string {
+    const reducer =
+    (jsonString, currentKey) =>
+    jsonString +=
+    `${quoteWrapper(fileOptions.doubleQuote, currentKey)}:
+    ${quoteWrapper(fileOptions.doubleQuote, jsonDictionary[currentKey])};\n`;
+    return Object.keys(jsonDictionary).reduce(reducer, '');
+  }
+
+  /*
+  Build nested node base on object attribute
+  newDoc['component'] = {}
+  newDic['component']['gender'] = 'value'
+  */
+  public buildNestedNode(keyArr: string[], jsonObject: {}, value: any, index: number) {
     if (index === (keyArr.length - 1)) {
-      newDictionary[keyArr[index]] = value;
+      jsonObject[keyArr[index]] = value;
       return;
     }
-    if (!(keyArr[index] in newDictionary)) {
-      newDictionary[keyArr[index]] = {};
+    if (!(keyArr[index] in jsonObject)) {
+      jsonObject[keyArr[index]] = {};
     }
-    this.buildNestedNode(keyArr, newDictionary[keyArr[index]], value, index + 1);
+    this.buildNestedNode(keyArr, jsonObject[keyArr[index]], value, index + 1);
   }
 
   public replaceValueDictionary(originalDictionary: {}, newDictionary: {}) {
@@ -90,7 +106,7 @@ export class JsonService {
 
   public formatJsonString(nestedJsonContent: {})  {
     /*
-    Task: Should add configuration for the format json
+    TODO: Should add configuration for the format json
     */
     return JSON.stringify(nestedJsonContent, null, '\t');
   }
