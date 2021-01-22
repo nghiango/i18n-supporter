@@ -1,3 +1,4 @@
+import { fileOptions } from './../shared/global-variable';
 import { quoteWrapper } from './util';
 import { FileOptions } from './../models/file-options';
 import {Injectable} from '@angular/core';
@@ -103,10 +104,11 @@ export class JsonService {
     return originalDictionary;
   }
 
-  public formatJsonString(nestedJsonContent: {})  {
-    /*
-    TODO: Should add configuration for the format json
-    */
+  public formatJsonString(nestedJsonContent: {}, fileOptions: FileOptions = null)  {
+
+    if(fileOptions && !fileOptions.tab) {
+      return JSON.stringify(nestedJsonContent, null, fileOptions.indentWidth);
+    }
     return JSON.stringify(nestedJsonContent, null, '\t');
   }
 

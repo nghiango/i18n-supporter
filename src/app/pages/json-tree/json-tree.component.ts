@@ -31,6 +31,7 @@ export class JsonTreeComponent implements OnInit {
   private currentJsonFlats: JsonFlat[];
   private editingKey = '';
   public filterControl = new FormControl();
+  private isDev = process.env.isDev;
   private toTest = {
     'components': {
       'duplicateOverlay': {
@@ -63,7 +64,7 @@ export class JsonTreeComponent implements OnInit {
   ngOnInit() {
     currentPath.next('json-tree');
     this.subscription.add(this.filterControl.valueChanges.subscribe(value => console.log(value)));
-    if (this.toTest) {
+    if (this.isDev) {
       const jsonDictionary = flatten(this.toTest);
       const fileDto = new FileDto('test', 'test', jsonDictionary, new FormControl());
       this.files.push(fileDto);
@@ -260,7 +261,7 @@ export class JsonTreeComponent implements OnInit {
     }
     this.files.forEach(file => {
       file.nestedJsonContent = this.jsonService.buildJson(file.jsonDictionary);
-      this.fileService.saveFile({path: file.path, content: this.jsonService.formatJsonString(file.nestedJsonContent)});
+      this.fileService.saveFile({path: file.path, content: this.jsonService.formatJsonString(file.nestedJsonContent, fileOptions)});
     });
   }
 

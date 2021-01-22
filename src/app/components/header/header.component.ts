@@ -1,3 +1,4 @@
+import { FormControl } from '@angular/forms';
 import { currentPath, fileOptions } from './../../shared/global-variable';
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
@@ -11,6 +12,8 @@ export class HeaderComponent implements OnInit {
   public currentPath: string;
   public isDashBoard: boolean;
   public isJsonTree: boolean;
+  public indentWidthControl = new FormControl(4);
+  public isUsingSpace: boolean;
 
   constructor(
     private route: Router
@@ -28,6 +31,7 @@ export class HeaderComponent implements OnInit {
         this.isJsonTree = false;
       }
     });
+    this.indentWidthControl.valueChanges.subscribe(value => this.setIndentWidth(value));
   }
 
   backToDashBoard() {
@@ -39,5 +43,13 @@ export class HeaderComponent implements OnInit {
   }
   public setFlattenJson(checked) {
     fileOptions.flatJson = checked;
+  }
+  public setUsingSpace(checked) {
+    fileOptions.tab = !checked;
+    this.isUsingSpace = checked;
+  }
+
+  public setIndentWidth(value) {
+    fileOptions.indentWidth = parseInt(value);
   }
 }

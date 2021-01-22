@@ -5,7 +5,7 @@ import { Builder } from './buider';
 export const fileOptions = Builder(FileOptions)
       .doubleQuote(false)
       .flatJson(false)
-      .indentWidth(2)
+      .indentWidth(4)
       .tab(true)
       .build();
 

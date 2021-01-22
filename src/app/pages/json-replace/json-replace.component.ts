@@ -4,6 +4,7 @@ import {FormControl} from '@angular/forms';
 import {CdkTextareaAutosize} from '@angular/cdk/text-field';
 import {JsonService} from '../../services/json.service';
 import { isNullOrUndefined } from 'src/app/services/util';
+import { fileOptions } from 'src/app/shared/global-variable';
 
 class TextAreaFileContent {
   formControl: FormControl;
@@ -62,6 +63,6 @@ export class JsonReplaceComponent implements OnInit {
     const newDictionary = this.jsonService.buildDictionary(newFileContent.jsonValue, '', {});
     const replacedDictionary = this.jsonService.replaceValueDictionary(originalDictionary, newDictionary);
     const nestedJsonContent = this.jsonService.buildJson(replacedDictionary);
-    this.resultContent.formControl.setValue(this.jsonService.formatJsonString(nestedJsonContent));
+    this.resultContent.formControl.setValue(this.jsonService.formatJsonString(nestedJsonContent, fileOptions));
   }
 }

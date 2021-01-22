@@ -1,11 +1,14 @@
 <div class="header" *ngIf="!isDashBoard">
   <img src="assets/images/back-btn.png" alt="back-button" class="header__back-btn" (click)="backToDashBoard()">
-  <div *ngIf="isJsonTree" style="display: flex; margin-left: 200px;">
-    <section>
+  <div *ngIf="isJsonTree" class="header__save-options">
+    <section class="header__option">
       <mat-checkbox (change)="setDoubleQuote($event.checked)">Double quote</mat-checkbox>
     </section>
-    <section>
+    <section class="header__option">
       <mat-checkbox (change)="setFlattenJson($event.checked)">Flatten JSON</mat-checkbox>
     </section>
-  </div>
+    <section class="header__option">
+      <mat-checkbox (change)="setUsingSpace($event.checked)">Using Space</mat-checkbox>
+    </section>
+    <input *ngIf="isUsingSpace" type="text" placeholder="Indent Width" id="indentWidth" [formControl]="indentWidthControl"/>
 </div>
