@@ -1,74 +1,61 @@
-<mat-sidenav-container class="example-container">
-  <mat-sidenav mode="side" opened style="width: 20%" #sidenav>
-    <div class="json-tree__menu">
-      <button mat-flat-button color="primary" [matMenuTriggerFor]="menu">Menu</button>
-      <mat-menu #menu="matMenu">
-        <button mat-menu-item (click)="fileImport.click()">Import</button>
-        <button mat-menu-item (click)="saveFile()">Save</button>
-        <button mat-menu-item (click)="reviewFiles()">Review</button>
-        <button mat-menu-item (click)="clearAll()">Clear</button>
-      </mat-menu>
+<mat-sidenav-container class="json-tree" (click)="disableContextMenu()">
+  <mat-sidenav mode="side" opened class="json-tree__sidenav" #sidenav>
+    <div class="json-tree__sidenav-header">
+      <input type="text" placeholder="node name" id="filterNode" [formControl]="filterControl"/>
+      <div class="json-tree__menu-btn">
+        <button mat-flat-button color="primary" [matMenuTriggerFor]="menu">Menu</button>
+        <mat-menu #menu="matMenu">
+          <button mat-menu-item (click)="fileImport.click()">Import</button>
+          <button mat-menu-item (click)="saveFile()">Save</button>
+          <button mat-menu-item (click)="reviewFiles()">Review</button>
+          <button mat-menu-item (click)="clearAll()">Clear</button>
+        </mat-menu>
 
-      <input type="file" [hidden]="true" #fileImport
-             id="file"
-             (change)="handleFileInput($event)"
-             placeholder="Choose File"
-             multiple>
+        <input type="file" [hidden]="true" #fileImport
+               id="file"
+               (change)="handleFileInput($event)"
+               placeholder="Choose File"
+               multiple/>
+      </div>
     </div>
-    <mat-tree [dataSource]="dataSource" [treeControl]="treeControl" class="example-tree">
-      <!-- This is the tree node template for leaf nodes -->
-      <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle>
-        <li class="mat-tree-node">
-          <!-- use a disabled button to provide padding for tree leaf -->
 
-          <div *ngIf="node.editingNumber === editNumber" class="d-flex align-items-center">
-            <ng-container *ngTemplateOutlet="inputTemplate, context: {$implicit: node}"></ng-container>
-          </div>
-          <div *ngIf="node.editingNumber !== editNumber" class="d-flex">
-            <a (click)="openNode(node)" class="item--clickable" [ngClass]="{'json-tree--node-active': node.selected}">
-              {{node.name}}
-            </a>
-            <ng-container *ngTemplateOutlet="nodeMenuTemplate, context: {$implicit: node}"></ng-container>
-          </div>
-        </li>
-      </mat-tree-node>
-      <!-- This is the tree node template for expandable nodes -->
-      <mat-nested-tree-node *matTreeNodeDef="let node; when:  hasChild">
-        <li>
-          <div class="mat-tree-node">
-            <button mat-icon-button matTreeNodeToggle
-                    [attr.aria-label]="'toggle ' + node.name">
-              <mat-icon class="mat-icon-rtl-mirror">
-                {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
-              </mat-icon>
-            </button>
-            <div *ngIf="node.editingNumber  === editNumber" class="d-flex align-items-center">
-              <ng-container *ngTemplateOutlet="inputTemplate, context: {$implicit: node}"></ng-container>
-            </div>
-            <div *ngIf="node.editingNumber  !== editNumber" class="d-flex">
-              <div matTreeNodeToggle
-                   [attr.aria-label]="'toggle ' + node.name"
-                   class="item--clickable">
-                {{node.name}}
-              </div>
-              <ng-container *ngTemplateOutlet="nodeMenuTemplate, context: {$implicit: node}"></ng-container>
-            </div>
+    <cdk-virtual-scroll-viewport class="json-tree__virtual-scroll-container" itemSize="18" oncontextmenu="return false;">
+      <ng-container *cdkVirtualFor="let node of dataSource">
+        <!-- Note that the [style.padding-left] is essentially what cdkTreeNodePadding is doing under the hood -->
+        <div [style.display]="shouldRender(node) ? 'flex' : 'none'"
+             class="json-tree__node" [style.padding-left]="node.level * 12 + 'px'"
+             (contextmenu)="onRightClick($event, node)">
+          <!-- Note that treeControl.toggle(node) is essentially what cdkTreeNodeToggle is doing under the hood -->
+          <a (click)="openNodeFlat(node)" style="width: 100%">
+            <span *ngIf="node.hasChildren" class="json-tree__expandable">
+              <mat-icon *ngIf="node.isExpanded">arrow_drop_down</mat-icon>
+              <mat-icon *ngIf="!node.isExpanded">arrow_right</mat-icon>
+              {{ node.name }}
+            </span>
+            <span *ngIf="!node.hasChildren" class="json-tree__leaf" [ngClass]="{'json-tree--active': node.selected}">
+              {{ node.name }}
+            </span>
+          </a>
+        </div>
+      </ng-container>
+    </cdk-virtual-scroll-viewport>
+    <div *ngIf="contextMenu==true">
+      <json-context-menu
+        [top]="contextMenuY"
+        (addNodeEmitter)="addKey()"
+        (renameNodeEmitter)="enterEditMode()"
+        (removeNodeEmitter)="removeKey()"
+      ></json-context-menu>
+    </div>
 
-          </div>
-          <ul [class.example-tree-invisible]="!treeControl.isExpanded(node)">
-            <ng-container matTreeNodeOutlet></ng-container>
-          </ul>
-        </li>
-      </mat-nested-tree-node>
-    </mat-tree>
   </mat-sidenav>
   <mat-sidenav-content>
     <button *ngIf="!sidenav.opened" mat-flat-button (click)="sidenav.toggle()">Open Sidenav</button>
-    <div class="json-tree__content" *ngIf="currentNode && !isReviewMode">
+    <div class="json-tree__content" *ngIf="currentNode && !isReviewMode && nodeHeader">
       <div class="json-tree__header">
-        <h3>{{currentNode.name}}</h3>
+        <h3>{{nodeHeader}}</h3>
         <mat-icon class="icon__medium icon--red item--clickable"
-                  (click)="removeKey(currentNode)">delete_forever</mat-icon>
+                  (click)="removeKey()">delete_forever</mat-icon>
       </div>
       <div *ngFor="let file of files">
         <div class="json-tree__row">
@@ -80,7 +67,9 @@
                     (click)="removeKeyInFile(file)">delete_forever</mat-icon>
           <mat-form-field style="width: 100%">
             <mat-label>{{file.fileName}}</mat-label>
-            <input matInput placeholder="Please fill value" [formControl]="file.formControl" (change)="updateValueForDictionary(file)">
+            <input matInput placeholder="Please fill value"
+                   [formControl]="file.formControl"
+                   (change)="updateValueForDictionary(file)"/>
           </mat-form-field>
         </div>
       </div>
@@ -114,14 +103,14 @@
   </mat-sidenav-content>
 </mat-sidenav-container>
 
-<ng-template #nodeMenuTemplate let-node>
-  <mat-icon class="item--clickable" [matMenuTriggerFor]="menuNode">more_vert</mat-icon>
-  <mat-menu #menuNode="matMenu">
-    <button mat-menu-item (click)="addKey(node)">Add Key</button>
-    <button mat-menu-item (click)="enterEditMode(node)">Rename Key</button>
-    <button mat-menu-item (click)="removeKey(node)">Remove Key</button>
-  </mat-menu>
-</ng-template>
+<!--<ng-template #nodeMenuTemplate let-node>-->
+<!--  <mat-icon class="item&#45;&#45;clickable" [matMenuTriggerFor]="menuNode">more_vert</mat-icon>-->
+<!--  <mat-menu #menuNode="matMenu">-->
+<!--    <button mat-menu-item (click)="addKey(node)">Add Key</button>-->
+<!--    <button mat-menu-item (click)="enterEditMode(node)">Rename Key</button>-->
+<!--    <button mat-menu-item (click)="removeKey(node)">Remove Key</button>-->
+<!--  </mat-menu>-->
+<!--</ng-template>-->
 
 <ng-template #inputTemplate let-node>
   <mat-form-field style="width: 100%">

@@ -1,16 +1,19 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
-import {NestedTreeControl} from '@angular/cdk/tree';
+import { ArrayDataSource } from '@angular/cdk/collections';
+import { CdkTextareaAutosize } from '@angular/cdk/text-field';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { FormControl } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
-import { MatTreeNestedDataSource } from '@angular/material/tree';
-import {JsonNode} from '../../models/json-node';
-import {JsonService} from '../../services/json.service';
-import {FormControl} from '@angular/forms';
-import {FileService} from '../../services/file.service';
-import {FileDto} from '../../models/file-dto';
-import {AddKeyDialogComponent} from '../../components/add-key-dialog/add-key-dialog.component';
-import {CdkTextareaAutosize} from '@angular/cdk/text-field';
-import {flatten, unflatten} from 'flat';
+import { flatten, unflatten } from 'flat';
+import { Subscription } from 'rxjs';
 import { isNullOrUndefined } from 'src/app/services/util';
+import { insert } from 'src/app/shared/arrays';
+
+import { AddKeyDialogComponent } from '../../components/add-key-dialog/add-key-dialog.component';
+import { FileDto } from '../../models/file-dto';
+import { JsonFlat } from '../../models/json-flat';
+import { FileService } from '../../services/file.service';
+import { JsonService } from '../../services/json.service';
+import { currentPath, fileOptions } from './../../shared/global-variable';
 
 @Component({
   selector: 'json-json-tree',
@@ -18,44 +21,72 @@ import { isNullOrUndefined } from 'src/app/services/util';
   styleUrls: ['./json-tree.component.scss']
 })
 export class JsonTreeComponent implements OnInit {
-  public currentNode: JsonNode;
+  public currentNode: JsonFlat;
   public files: FileDto[] = [];
-  public treeControl = new NestedTreeControl<JsonNode>(node => node.children);
-  public dataSource = new MatTreeNestedDataSource<JsonNode>();
+  public dataSource: ArrayDataSource<JsonFlat>;
+  public nodeHeader = '';
   public isReviewMode: boolean;
   private currentJsonDictionary: Object;
   private currentNestedJson: Object;
-  private currentJsonNodes: JsonNode[];
-  private editNumber = '';
+  private currentJsonFlats: JsonFlat[];
+  private editingKey = '';
+  public filterControl = new FormControl();
+  private isDev = process.env.isDev;
+  private toTest = {
+    'components': {
+      'duplicateOverlay': {
+        'gender': 'Gender',
+        'what': 'asd'
+      }
+    },
+    'profile': {
+      'person': {
+        'name': 'Nghia'
+      }
+    }
+  };
+
+  private contextMenuX: number;
+  private contextMenuY: number;
+  public contextMenu: boolean;
+
+  private subscription = new Subscription();
+
   constructor(
     public jsonService: JsonService,
     public fileService: FileService,
     public dialog: MatDialog,
-  ) {}
-
-  @ViewChild('autosize') autosize: CdkTextareaAutosize;
-
-  ngOnInit() {}
-  hasChild = (_: number, node: JsonNode) => !!node.children && node.children.length > 0;
-
-  openNode(node: JsonNode) {
-    this.toggleNode(node);
-    this.currentNode = node;
-    this.isReviewMode = false;
-    this.updateValueFormControl(this.files, this.currentNode);
+  ) {
   }
 
-  private toggleNode(node: JsonNode) {
-    if (this.currentNode) {
-      this.currentNode.selected = false;
+  @ViewChild('autosize', {static: false}) autosize: CdkTextareaAutosize;
+
+  ngOnInit() {
+    currentPath.next('json-tree');
+    this.subscription.add(this.filterControl.valueChanges.subscribe(value => console.log(value)));
+    if (this.isDev) {
+      const jsonDictionary = flatten(this.toTest);
+      const fileDto = new FileDto('test', 'test', jsonDictionary, new FormControl());
+      this.files.push(fileDto);
+      this.initJsonTree(this.toTest, Object.assign({}, jsonDictionary));
+      this.updateJsonTreeData(this.currentJsonFlats);
     }
-    node.selected = true;
   }
 
-  private updateValueFormControl(files: FileDto[], jsonNode: JsonNode) {
+  private toggleNode(node: JsonFlat) {
+    node.isExpanded = !node.isExpanded;
+    if (node.hasChildren && !node.isExpanded) {
+      const childNodes = this.getChildNodes(node);
+      for (let i = 0; i < childNodes.length; i++) {
+        childNodes[i].isExpanded = node.isExpanded;
+      }
+    }
+  }
+
+  private updateValueFormControl(files: FileDto[], path: string) {
     files.forEach(file => {
-      file.formControl.setValue(file.jsonDictionary[jsonNode.path]);
-      if (!(jsonNode.path in file.jsonDictionary)) {
+      file.formControl.setValue(file.jsonDictionary[path]);
+      if (!(path in file.jsonDictionary)) {
         file.notExisted = true;
         file.formControl.disable();
       } else {
@@ -73,7 +104,6 @@ export class JsonTreeComponent implements OnInit {
     const fileImports: File[] = Array.from($event.target.files);
     let count = 0;
     fileImports.forEach(file => {
-
       this.fileService.readFile(file.path).then(content => {
         const jsonObject = this.jsonService.parseToJson(content);
         const jsonDictionary = flatten(jsonObject);
@@ -83,7 +113,7 @@ export class JsonTreeComponent implements OnInit {
         this.initJsonTree(jsonObject, Object.assign({}, jsonDictionary));
         count++;
         if (count === fileImports.length) {
-          this.updateJsonTreeData(this.currentJsonNodes);
+          this.updateJsonTreeData(this.currentJsonFlats);
         }
       });
     });
@@ -96,16 +126,13 @@ export class JsonTreeComponent implements OnInit {
     } else {
       this.currentJsonDictionary = this.jsonService.mergeKeys(this.currentJsonDictionary, jsonDictionary);
       this.currentNestedJson = unflatten(this.currentJsonDictionary);
-      // this.currentNestedJson = this.jsonService.buildJson(this.currentJsonDictionary);
     }
 
-    this.currentJsonNodes = this.jsonService.buildJsonNodes(this.currentNestedJson, [], '');
+    this.currentJsonFlats = this.jsonService.buildJsonFlats(this.currentNestedJson, '', 1, []);
   }
 
-  private updateJsonTreeData(jsonNodes: JsonNode[]) {
-    this.dataSource.data = null;
-    this.dataSource.data = jsonNodes;
-    this.treeControl.dataNodes = jsonNodes;
+  private updateJsonTreeData(jsonFlats: JsonFlat[]) {
+    this.dataSource = new ArrayDataSource(jsonFlats);
   }
 
   addKeyInFile(file: FileDto) {
@@ -121,70 +148,73 @@ export class JsonTreeComponent implements OnInit {
     file.formControl.setValue('');
   }
 
-  removeKey(node: JsonNode) {
-    this.currentNode = node;
+  removeKey() {
     this.files.forEach(file => {
       this.removeKeyInFile(file);
     });
-    this.currentJsonNodes = this.removeNode(node, this.currentJsonNodes);
-    this.updateJsonTreeData(this.currentJsonNodes);
+    this.currentJsonFlats = this.removeNode(this.currentNode, this.currentJsonFlats);
+    this.updateJsonTreeData(this.currentJsonFlats);
     this.currentNode = null;
+    this.nodeHeader = '';
   }
 
-  private removeNode(node: JsonNode, jsonNodes: JsonNode[]): JsonNode[] {
-    for (let i = 0; i < jsonNodes.length; i++) {
-      if (jsonNodes[i].path === node.path) {
-        jsonNodes.splice(i, 1);
+  private removeNode = (node: JsonFlat, jsonFlats: JsonFlat[]): JsonFlat[] => {
+    for (let i = 0; i < jsonFlats.length; i++) {
+      if (jsonFlats[i].path === node.path) {
+        jsonFlats.splice(i, 1);
         break;
-      } else if (jsonNodes[i].children) {
-        jsonNodes[i].children = this.removeNode(node, jsonNodes[i].children);
       }
     }
-    return jsonNodes;
+    return jsonFlats;
   }
 
-  addKey(currentNode: JsonNode) {
+  addKey() {
     this.dialog.open(AddKeyDialogComponent, {
       data: {
         files: this.files,
-        node: currentNode
+        node: this.currentNode
       }
-    }).afterClosed().subscribe(() => {
-      this.updateJsonTreeData(this.currentJsonNodes);
+    }).afterClosed().subscribe(value => {
+      if (!value) {
+        return;
+      }
+      let parentIndex = this.currentJsonFlats.indexOf(this.currentNode);
+      insert(this.currentJsonFlats, ++parentIndex, value);
+      this.updateJsonTreeData(this.currentJsonFlats);
     });
   }
 
-  enterEditMode(node: JsonNode) {
-    this.editNumber = Date.now().toString();
-    node.editingNumber = this.editNumber;
+  enterEditMode() {
+    this.editingKey = Date.now().toString();
+    this.currentNode.editingKey = this.editingKey;
   }
 
-  exitEditMode(node: JsonNode) {
-    this.editNumber = '';
+  exitEditMode(node: JsonFlat) {
+    this.editingKey = '';
     node.formControl.setValue(node.name);
   }
 
-  updateKeyName(node: JsonNode) {
+  updateKeyName(node: JsonFlat) {
     if (this.isNewKeyExistedInThisLevel(node) || node.formControl.invalid) {
       this.exitEditMode(node);
       alert('Your key is duplicated or blank, please change it!');
     } else {
-      this.editNumber = '';
+      this.editingKey = '';
       node.name = node.formControl.value;
       const oldPath = node.path;
       const newPath = node.path = this.jsonService.getCombinePath(node.name, node.path);
-      this.updateParentPathOfChildren(node.path, node.children);
+      this.updateParentPathOfChildren(node);
       this.updatePathOfDictionary(oldPath, newPath);
     }
   }
 
-  private isNewKeyExistedInThisLevel(node: JsonNode) {
-    const parentKey = node.parentPath;
-    const parentNode = this.findNodeByPath(parentKey, this.currentJsonNodes);
+  private isNewKeyExistedInThisLevel(node: JsonFlat) {
+    const parentNode = this.getParentNode(node);
     if (parentNode) {
-      for (let i = 0; i < parentNode.children.length; i++) {
-        if ((isNullOrUndefined(parentNode.children[i].editingNumber) || parentNode.children[i].editingNumber === '')
-          && parentNode.children[i].name === node.formControl.value) {
+      const childrenNodes = this.getChildNodes(parentNode);
+      for (let i = 0; i < childrenNodes.length; i++) {
+        if ((isNullOrUndefined(childrenNodes[i].editingKey) || childrenNodes[i].editingKey === '')
+          && childrenNodes[i].name === node.formControl.value) {
           return true;
         }
       }
@@ -192,29 +222,16 @@ export class JsonTreeComponent implements OnInit {
     return false;
   }
 
-  private findNodeByPath(path: string, jsonNodes: JsonNode[]): JsonNode {
-    for (let i = 0; i < jsonNodes.length; i++) {
-      if (jsonNodes[i].path === path) {
-        return jsonNodes[i];
-      }
-      if (jsonNodes[i].children) {
-        const node = this.findNodeByPath(path, jsonNodes[i].children);
-        if (node) {
-        return node;
-        }
-      }
-    }
-    return null;
-  }
-
   reviewFiles() {
     this.isReviewMode = true;
     this.files.forEach(file => file.nestedJsonContent = this.jsonService.buildJson(file.jsonDictionary));
   }
 
-  private updateParentPathOfChildren(path: string, nodes: JsonNode[]) {
-    if (nodes) {
-      nodes.forEach(node => node.parentPath = path);
+  private updateParentPathOfChildren(parentNode: JsonFlat) {
+    const childNodes = this.getChildNodes(parentNode);
+    if (childNodes) {
+      // TODO: Should think again of update parent Path
+      // childNodes.forEach(node => node.parentPath = parentNode.path);
     }
   }
 
@@ -226,18 +243,78 @@ export class JsonTreeComponent implements OnInit {
   }
 
   clearAll() {
-    this.currentJsonNodes = null;
+    this.currentJsonFlats = null;
     this.currentJsonDictionary = null;
     this.currentNestedJson = null;
     this.currentNode = null;
     this.files = [];
-    this.updateJsonTreeData(this.currentJsonNodes);
+    this.updateJsonTreeData(this.currentJsonFlats);
   }
 
   saveFile() {
+    if (fileOptions.flatJson) {
+      this.files.forEach(file => {
+        const flattenJson = this.jsonService.buildFlattenJsonString(file.jsonDictionary, fileOptions);
+        this.fileService.saveFile({path: file.path, content: flattenJson});
+      });
+      return;
+    }
     this.files.forEach(file => {
       file.nestedJsonContent = this.jsonService.buildJson(file.jsonDictionary);
-      this.fileService.saveFile({path: file.path, content: this.jsonService.formatJsonString(file.nestedJsonContent)});
+      this.fileService.saveFile({path: file.path, content: this.jsonService.formatJsonString(file.nestedJsonContent, fileOptions)});
     });
+  }
+
+  openNodeFlat(node: JsonFlat) {
+    this.toggleNode(node);
+    if (!node.hasChildren) {
+      if (this.currentNode) {
+        this.currentNode.selected = false;
+      }
+      this.currentNode = node;
+      this.nodeHeader = this.currentNode.name;
+      node.selected = true;
+      this.isReviewMode = false;
+      this.updateValueFormControl(this.files, node.path);
+    }
+  }
+
+  onRightClick(event: MouseEvent, node: JsonFlat) {
+    this.contextMenuX = event.clientX;
+    this.contextMenuY = event.clientY;
+    this.contextMenu = !this.contextMenu;
+    this.currentNode = node;
+  }
+
+  disableContextMenu() {
+    this.contextMenu = false;
+  }
+
+  public shouldRender(node: JsonFlat): boolean {
+    const parent = this.getParentNode(node);
+    return !parent || parent.isExpanded;
+  }
+
+  private getParentNode(node: JsonFlat): JsonFlat {
+    const nodeIndex = this.currentJsonFlats.indexOf(node);
+    for (let i = nodeIndex - 1; i >= 0; i--) {
+      if (this.currentJsonFlats[i].level === node.level - 1) {
+        return this.currentJsonFlats[i];
+      }
+    }
+    return null;
+  }
+
+  private getChildNodes(node: JsonFlat): JsonFlat[] {
+    const children = [];
+    const nodeIndex = this.currentJsonFlats.indexOf(node);
+    for (let i = nodeIndex + 1; i < this.currentJsonFlats.length; i++) {
+      if (this.currentJsonFlats[i].parentPath.startsWith(node.path)) {
+        children.push(this.currentJsonFlats[i]);
+      } else {
+        break;
+      }
+    }
+    return children;
   }
 }

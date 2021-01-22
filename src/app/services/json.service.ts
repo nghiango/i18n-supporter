@@ -1,7 +1,9 @@
+import { fileOptions } from './../shared/global-variable';
+import { quoteWrapper } from './util';
+import { FileOptions } from './../models/file-options';
 import {Injectable} from '@angular/core';
-import {JsonNode} from '../models/json-node';
-import {FormControl, Validators} from '@angular/forms';
 import {Builder} from '../shared/buider';
+import { JsonFlat } from 'src/app/models/json-flat';
 
 @Injectable({
   providedIn: 'root'
@@ -10,38 +12,26 @@ export class JsonService {
 
   constructor() { }
 
-  public buildJsonNodes(resource: Object, jsonNodes: JsonNode[], path: string) {
-    const tempPath = path;
-    const keys = Object.keys(resource);
-    if (keys.length > 0) {
-      for (let i = 0; i < keys.length; i++) {
-        if (typeof resource[keys[i]] !== 'string') {
-          if (Object.keys(resource[keys[i]]).length > 0) {
-            path += keys[i] + '.';
-            const node = Builder(JsonNode)
-              .name(keys[i])
-              .children([])
-              .path(path)
-              .parentPath(tempPath)
-              .formControl(new FormControl(keys[i], Validators.required))
-              .build();
-            node.children = this.buildJsonNodes(resource[keys[i]], [],  path);
-            jsonNodes.push(node);
-            path = tempPath;
-          }
-        } else {
-          const finalPath = path + keys[i];
-          const node = Builder(JsonNode)
-            .name(keys[i])
-            .path(finalPath)
-            .formControl(new FormControl(keys[i], Validators.required))
-            .parentPath(tempPath)
-            .build();
-          jsonNodes.push(node);
-        }
+  public buildJsonFlats(resource: Object, path: string, level: number, jsonFlats: any[]) {
+    const parentPath = path;
+    const rootLevel = level;
+    for (const key in resource) {
+      path += key;
+      if (this.isObject(resource[key])) {
+        const jsonFlat = this.addJsonFlat(jsonFlats, key, path, parentPath, level, true);
+        path = jsonFlat.path;
+        this.buildJsonFlats(resource[key], path, ++level, jsonFlats);
+      } else {
+        this.addJsonFlat(jsonFlats, key, path, parentPath, level);
       }
+      path = parentPath;
+      level = rootLevel;
     }
-    return jsonNodes;
+    return jsonFlats;
+  }
+
+  public isObject(object) {
+    return object && typeof object === 'object';
   }
 
   public buildDictionary(resource: Object, path: string, jsonDictionary: Object) {
@@ -73,23 +63,36 @@ export class JsonService {
   }
 
   public buildJson(dictionary: {}) {
-    const newDictionary = {};
+    const jsonObject = {};
     Object.keys(dictionary).forEach(key => {
       const keyArr = key.split('.');
-      this.buildNestedNode(keyArr, newDictionary, dictionary[key], 0);
+      this.buildNestedNode(keyArr, jsonObject, dictionary[key], 0);
     });
-    return newDictionary;
+    return jsonObject;
   }
 
-  public buildNestedNode(keyArr: string[], newDictionary: {}, value: any, index: number) {
+  public buildFlattenJsonString(jsonDictionary: Object, fileOptions: FileOptions): string {
+    const reducer =
+    (jsonString, currentKey) =>
+    jsonString +=
+    `${quoteWrapper(fileOptions.doubleQuote, currentKey)}: ${quoteWrapper(fileOptions.doubleQuote, jsonDictionary[currentKey])},\n`;
+    return `{\n${Object.keys(jsonDictionary).reduce(reducer, '')}}`;
+  }
+
+  /*
+  Build nested node base on object attribute
+  newDoc['component'] = {}
+  newDic['component']['gender'] = 'value'
+  */
+  public buildNestedNode(keyArr: string[], jsonObject: {}, value: any, index: number) {
     if (index === (keyArr.length - 1)) {
-      newDictionary[keyArr[index]] = value;
+      jsonObject[keyArr[index]] = value;
       return;
     }
-    if (!(keyArr[index] in newDictionary)) {
-      newDictionary[keyArr[index]] = {};
+    if (!(keyArr[index] in jsonObject)) {
+      jsonObject[keyArr[index]] = {};
     }
-    this.buildNestedNode(keyArr, newDictionary[keyArr[index]], value, index + 1);
+    this.buildNestedNode(keyArr, jsonObject[keyArr[index]], value, index + 1);
   }
 
   public replaceValueDictionary(originalDictionary: {}, newDictionary: {}) {
@@ -101,10 +104,11 @@ export class JsonService {
     return originalDictionary;
   }
 
-  public formatJsonString(nestedJsonContent: {})  {
-    /*
-    Task: Should add configuration for the format json
-    */
+  public formatJsonString(nestedJsonContent: {}, fileOptions: FileOptions = null)  {
+
+    if(fileOptions && !fileOptions.tab) {
+      return JSON.stringify(nestedJsonContent, null, fileOptions.indentWidth);
+    }
     return JSON.stringify(nestedJsonContent, null, '\t');
   }
 
@@ -130,5 +134,21 @@ export class JsonService {
       }
       newPath += pathArr[i] + '.';
     }
+  }
+
+  private addJsonFlat = (jsonFlats, name: string, path: string, parentPath: string, level: number, hasChildren = false): JsonFlat => {
+    if (hasChildren) {
+      path += '.';
+    }
+    const jsonFlat =
+      Builder(JsonFlat)
+        .name(name)
+        .path(path)
+        .parentPath(parentPath)
+        .level(level)
+        .hasChildren(hasChildren)
+        .build();
+    jsonFlats.push(jsonFlat);
+    return jsonFlat;
   }
 }

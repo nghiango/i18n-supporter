@@ -1,13 +1,13 @@
 {
 	"components": {
 		"duplicateOverlay": {
-			"gender": "Gender",
-			"what": "ok, but it should be difference"
+			"gender": "another name",
+			"name": "my name"
 		}
 	},
 	"profile": {
 		"person": {
-			"name": "Nghia"
+			"name": "Lam"
 		}
 	}
 }

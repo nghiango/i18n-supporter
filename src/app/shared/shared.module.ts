@@ -12,6 +12,8 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatTreeModule } from '@angular/material/tree';
 import {JsonService} from '../services/json.service';
+import { ScrollingModule } from '@angular/cdk/scrolling';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 
 @NgModule({
   declarations: [],
@@ -33,7 +35,9 @@ import {JsonService} from '../services/json.service';
     MatSidenavModule,
     MatMenuModule,
     MatDialogModule,
-    MatExpansionModule
+    MatExpansionModule,
+    ScrollingModule,
+    MatCheckboxModule
   ],
   providers: [FileService, JsonService],
 })
