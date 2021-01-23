@@ -1,3 +1,4 @@
+import { environment } from './../../../environments/environment';
 import { ArrayDataSource } from '@angular/cdk/collections';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { Component, OnInit, ViewChild } from '@angular/core';
@@ -31,17 +32,18 @@ export class JsonTreeComponent implements OnInit {
   private currentJsonFlats: JsonFlat[];
   private editingKey = '';
   public filterControl = new FormControl();
-  private isDev = process.env.isDev;
+  private isDev = environment.isDev;
   private toTest = {
     'components': {
       'duplicateOverlay': {
         'gender': 'Gender',
-        'what': 'asd'
+        'what': 'in component'
       }
     },
     'profile': {
       'person': {
-        'name': 'Nghia'
+        'name': 'Nghia',
+        'what': 'in profile'
       }
     }
   };
@@ -63,7 +65,7 @@ export class JsonTreeComponent implements OnInit {
 
   ngOnInit() {
     currentPath.next('json-tree');
-    this.subscription.add(this.filterControl.valueChanges.subscribe(value => console.log(value)));
+    this.subscription.add(this.filterControl.valueChanges.subscribe(value => this.filterNode(value)));
     if (this.isDev) {
       const jsonDictionary = flatten(this.toTest);
       const fileDto = new FileDto('test', 'test', jsonDictionary, new FormControl());
@@ -71,6 +73,12 @@ export class JsonTreeComponent implements OnInit {
       this.initJsonTree(this.toTest, Object.assign({}, jsonDictionary));
       this.updateJsonTreeData(this.currentJsonFlats);
     }
+  }
+
+  private filterNode(value: string): void {
+    console.log(value);
+    // TODO: Update logic here
+
   }
 
   private toggleNode(node: JsonFlat) {
