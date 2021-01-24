@@ -1,9 +1,8 @@
-import { fileOptions } from './../shared/global-variable';
-import { quoteWrapper } from './util';
-import { FileOptions } from './../models/file-options';
+import {quoteWrapper} from './util';
+import {FileOptions} from './../models/file-options';
 import {Injectable} from '@angular/core';
 import {Builder} from '../shared/buider';
-import { JsonFlat } from 'src/app/models/json-flat';
+import {JsonFlat} from 'src/app/models/json-flat';
 
 @Injectable({
   providedIn: 'root'
@@ -150,5 +149,23 @@ export class JsonService {
         .build();
     jsonFlats.push(jsonFlat);
     return jsonFlat;
+  }
+
+  public prepareDataForSearching(jsonDic: Object) {
+    const dataForSearchValue: Map<string, string[]> = new Map<string, string[]>();
+    const dataForSearchKey: string[] = [];
+    Object.keys(jsonDic).forEach(key => {
+      dataForSearchKey.push(key);
+      const value = jsonDic[key].toLowerCase();
+      if (dataForSearchValue[value]) {
+        dataForSearchValue[value] = [...dataForSearchValue[value], key];
+      } else {
+        dataForSearchValue[value] = [key];
+      }
+    });
+    return {
+      dataForSearchValue: dataForSearchValue,
+      dataForSearchKey: dataForSearchKey
+    };
   }
 }

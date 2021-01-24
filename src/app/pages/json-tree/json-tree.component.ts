@@ -1,20 +1,21 @@
-import { environment } from './../../../environments/environment';
-import { ArrayDataSource } from '@angular/cdk/collections';
-import { CdkTextareaAutosize } from '@angular/cdk/text-field';
-import { Component, OnInit, ViewChild } from '@angular/core';
-import { FormControl } from '@angular/forms';
-import { MatDialog } from '@angular/material/dialog';
-import { flatten, unflatten } from 'flat';
-import { Subscription } from 'rxjs';
-import { isNullOrUndefined } from 'src/app/services/util';
-import { insert } from 'src/app/shared/arrays';
+import {environment} from '../../../environments/environment';
+import {ArrayDataSource} from '@angular/cdk/collections';
+import {CdkTextareaAutosize} from '@angular/cdk/text-field';
+import {Component, OnInit, ViewChild} from '@angular/core';
+import {FormControl} from '@angular/forms';
+import {MatDialog} from '@angular/material/dialog';
+import {flatten, unflatten} from 'flat';
+import {Subscription} from 'rxjs';
+import {isNullOrUndefined} from 'src/app/services/util';
+import {insert} from 'src/app/shared/arrays';
 
-import { AddKeyDialogComponent } from '../../components/add-key-dialog/add-key-dialog.component';
-import { FileDto } from '../../models/file-dto';
-import { JsonFlat } from '../../models/json-flat';
-import { FileService } from '../../services/file.service';
-import { JsonService } from '../../services/json.service';
-import { currentPath, fileOptions } from './../../shared/global-variable';
+import {AddKeyDialogComponent} from '../../components/add-key-dialog/add-key-dialog.component';
+import {FileDto} from '../../models/file-dto';
+import {JsonFlat} from '../../models/json-flat';
+import {FileService} from '../../services/file.service';
+import {JsonService} from '../../services/json.service';
+import {currentPath, fileOptions} from '../../shared/global-variable';
+import {debounceTime, distinctUntilChanged} from 'rxjs/operators';
 
 @Component({
   selector: 'json-json-tree',
@@ -28,8 +29,10 @@ export class JsonTreeComponent implements OnInit {
   public nodeHeader = '';
   public isReviewMode: boolean;
   private currentJsonDictionary: Object;
+  private searchedJsonDic: Object;
   private currentNestedJson: Object;
   private currentJsonFlats: JsonFlat[];
+  private searchedJsonFlats: JsonFlat[];
   private editingKey = '';
   public filterControl = new FormControl();
   private isDev = environment.isDev;
@@ -37,6 +40,7 @@ export class JsonTreeComponent implements OnInit {
     'components': {
       'duplicateOverlay': {
         'gender': 'Gender',
+        'name': 'Nghia',
         'what': 'in component'
       }
     },
@@ -53,6 +57,8 @@ export class JsonTreeComponent implements OnInit {
   public contextMenu: boolean;
 
   private subscription = new Subscription();
+  private currentSearchKeyData: string[];
+  private currentSearchValueData: Map<string, string[]>;
 
   constructor(
     public jsonService: JsonService,
@@ -65,20 +71,36 @@ export class JsonTreeComponent implements OnInit {
 
   ngOnInit() {
     currentPath.next('json-tree');
-    this.subscription.add(this.filterControl.valueChanges.subscribe(value => this.filterNode(value)));
+    this.subscription.add(this.filterControl.valueChanges.pipe(
+      debounceTime(500),
+      distinctUntilChanged()
+    ).subscribe(value => this.filterNode(value)));
     if (this.isDev) {
       const jsonDictionary = flatten(this.toTest);
       const fileDto = new FileDto('test', 'test', jsonDictionary, new FormControl());
       this.files.push(fileDto);
       this.initJsonTree(this.toTest, Object.assign({}, jsonDictionary));
       this.updateJsonTreeData(this.currentJsonFlats);
+      this.prepareDataForSearching();
     }
   }
 
   private filterNode(value: string): void {
-    console.log(value);
-    // TODO: Update logic here
+    this.searchedJsonDic = {};
+    this.searchedJsonFlats = null;
+    if (this.currentSearchValueData) {
+      const keys = this.currentSearchValueData[value];
+      if (keys && keys.length > 0) {
+        keys.forEach(key => this.searchedJsonDic[key] = this.currentJsonDictionary[key]);
+        this.searchedJsonFlats = this.jsonService.buildJsonFlats(unflatten(this.searchedJsonDic), '', 1, []);
+      }
+    }
 
+    if (this.searchedJsonFlats && this.searchedJsonFlats.length > 0) {
+      this.updateJsonTreeData(this.searchedJsonFlats);
+    } else {
+      this.updateJsonTreeData(this.currentJsonFlats);
+    }
   }
 
   private toggleNode(node: JsonFlat) {
@@ -105,6 +127,7 @@ export class JsonTreeComponent implements OnInit {
   }
 
   updateValueForDictionary(file: FileDto) {
+    // TODO: Should use valueChanges and deboundedTime to reduce update
     file.jsonDictionary[this.currentNode.path] = file.formControl.value;
   }
 
@@ -125,6 +148,7 @@ export class JsonTreeComponent implements OnInit {
         }
       });
     });
+    this.prepareDataForSearching();
   }
 
   private initJsonTree(jsonObject, jsonDictionary) {
@@ -135,7 +159,6 @@ export class JsonTreeComponent implements OnInit {
       this.currentJsonDictionary = this.jsonService.mergeKeys(this.currentJsonDictionary, jsonDictionary);
       this.currentNestedJson = unflatten(this.currentJsonDictionary);
     }
-
     this.currentJsonFlats = this.jsonService.buildJsonFlats(this.currentNestedJson, '', 1, []);
   }
 
@@ -304,10 +327,11 @@ export class JsonTreeComponent implements OnInit {
   }
 
   private getParentNode(node: JsonFlat): JsonFlat {
-    const nodeIndex = this.currentJsonFlats.indexOf(node);
+    const jsonFlats = this.searchedJsonFlats ? this.searchedJsonFlats : this.currentJsonFlats;
+    const nodeIndex = jsonFlats.indexOf(node);
     for (let i = nodeIndex - 1; i >= 0; i--) {
-      if (this.currentJsonFlats[i].level === node.level - 1) {
-        return this.currentJsonFlats[i];
+      if (jsonFlats[i].level === node.level - 1) {
+        return jsonFlats[i];
       }
     }
     return null;
@@ -324,5 +348,11 @@ export class JsonTreeComponent implements OnInit {
       }
     }
     return children;
+  }
+
+  private prepareDataForSearching() {
+    const { dataForSearchValue, dataForSearchKey } = this.jsonService.prepareDataForSearching(this.currentJsonDictionary);
+    this.currentSearchKeyData = dataForSearchKey;
+    this.currentSearchValueData = dataForSearchValue;
   }
 }
