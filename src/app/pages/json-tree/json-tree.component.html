@@ -1,7 +1,13 @@
 <mat-sidenav-container class="json-tree" (click)="disableContextMenu()">
   <mat-sidenav mode="side" opened class="json-tree__sidenav" #sidenav>
+    <div class="json-tree__search-options">
+      <mat-radio-group aria-label="Select an option" class="json-tree__options" [formControl]="searchOptionControl">
+        <mat-radio-button value="value">Search by value</mat-radio-button>
+        <mat-radio-button value="key">Search by key</mat-radio-button>
+      </mat-radio-group>
+    </div>
     <div class="json-tree__sidenav-header">
-      <input type="text" placeholder="node name" id="filterNode" [formControl]="filterControl"/>
+      <input type="text" placeholder="{{searchPlaceholder}}" id="filterNode" [formControl]="filterControl"/>
       <div class="json-tree__menu-btn">
         <button mat-flat-button color="primary" [matMenuTriggerFor]="menu">Menu</button>
         <mat-menu #menu="matMenu">

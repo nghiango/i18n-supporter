@@ -17,6 +17,7 @@ import {JsonService} from '../../services/json.service';
 import {currentPath, fileOptions} from '../../shared/global-variable';
 import {debounceTime, distinctUntilChanged} from 'rxjs/operators';
 
+type SearchBy = 'key' | 'value';
 @Component({
   selector: 'json-json-tree',
   templateUrl: './json-tree.component.html',
@@ -35,7 +36,10 @@ export class JsonTreeComponent implements OnInit {
   private searchedJsonFlats: JsonFlat[];
   private editingKey = '';
   public filterControl = new FormControl();
+  public searchOptionControl = new FormControl('value');
   private isDev = environment.isDev;
+  public searchPlaceholder = 'Search by value';
+  private searchBy: SearchBy = 'value';
   private toTest = {
     'components': {
       'duplicateOverlay': {
@@ -64,8 +68,7 @@ export class JsonTreeComponent implements OnInit {
     public jsonService: JsonService,
     public fileService: FileService,
     public dialog: MatDialog,
-  ) {
-  }
+  ) {} 
 
   @ViewChild('autosize', {static: false}) autosize: CdkTextareaAutosize;
 
@@ -74,7 +77,11 @@ export class JsonTreeComponent implements OnInit {
     this.subscription.add(this.filterControl.valueChanges.pipe(
       debounceTime(500),
       distinctUntilChanged()
-    ).subscribe(value => this.filterNode(value)));
+    ).subscribe(value => this.filterNode(value, this.searchBy)));
+    this.subscription.add(this.searchOptionControl.valueChanges.pipe(
+      debounceTime(200),
+      distinctUntilChanged()
+    ).subscribe(value => this.searchBy = value));
     if (this.isDev) {
       const jsonDictionary = flatten(this.toTest);
       const fileDto = new FileDto('test', 'test', jsonDictionary, new FormControl());
@@ -85,14 +92,14 @@ export class JsonTreeComponent implements OnInit {
     }
   }
 
-  private filterNode(value: string): void {
+  private filterNode(value: string, searchBy: SearchBy = 'value'): void {
     this.searchedJsonDic = {};
     this.searchedJsonFlats = null;
-    if (this.currentSearchValueData) {
+    if (this.currentSearchValueData && searchBy === 'value') {
       const keys = this.currentSearchValueData[value];
       if (keys && keys.length > 0) {
         keys.forEach(key => this.searchedJsonDic[key] = this.currentJsonDictionary[key]);
-        this.searchedJsonFlats = this.jsonService.buildJsonFlats(unflatten(this.searchedJsonDic), '', 1, []);
+        this.searchedJsonFlats = this.jsonService.buildJsonFlats(unflatten(this.searchedJsonDic), '', 1, [], true);
       }
     }
 

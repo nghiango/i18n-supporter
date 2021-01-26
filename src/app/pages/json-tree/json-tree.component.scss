@@ -70,6 +70,16 @@
 
   }
 
+  &__search-options {
+    margin-top: 15px;
+    margin-right: 10px;
+    margin-left: 10px;
+  }
+  &__options {
+    display: flex;
+    justify-content: space-between;
+  }
+
   &__text-review {
     color: #000000 !important;
   }
