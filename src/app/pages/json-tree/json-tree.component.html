@@ -30,16 +30,23 @@
         <!-- Note that the [style.padding-left] is essentially what cdkTreeNodePadding is doing under the hood -->
         <div [style.display]="shouldRender(node) ? 'flex' : 'none'"
              class="json-tree__node" [style.padding-left]="node.level * 12 + 'px'"
-             (contextmenu)="onRightClick($event, node)">
+             (contextmenu)="onRightClick($event, node)" (click)="openNodeFlat(node)">
           <!-- Note that treeControl.toggle(node) is essentially what cdkTreeNodeToggle is doing under the hood -->
-          <a (click)="openNodeFlat(node)" style="width: 100%">
+          <a style="width: 100%">
             <span *ngIf="node.hasChildren" class="json-tree__expandable">
               <mat-icon *ngIf="node.isExpanded">arrow_drop_down</mat-icon>
               <mat-icon *ngIf="!node.isExpanded">arrow_right</mat-icon>
               {{ node.name }}
             </span>
             <span *ngIf="!node.hasChildren" class="json-tree__leaf" [ngClass]="{'json-tree--active': node.selected}">
-              {{ node.name }}
+              <span *ngIf="node.editingKey !== editingKey">
+                {{ node.name }}
+              </span>
+              <div *ngIf="node.editingKey === editingKey">
+                <ng-container *ngTemplateOutlet="inputTemplate; context: {$implicit: node}"></ng-container>
+              </div>
+
+
             </span>
           </a>
         </div>
@@ -109,18 +116,9 @@
   </mat-sidenav-content>
 </mat-sidenav-container>
 
-<!--<ng-template #nodeMenuTemplate let-node>-->
-<!--  <mat-icon class="item&#45;&#45;clickable" [matMenuTriggerFor]="menuNode">more_vert</mat-icon>-->
-<!--  <mat-menu #menuNode="matMenu">-->
-<!--    <button mat-menu-item (click)="addKey(node)">Add Key</button>-->
-<!--    <button mat-menu-item (click)="enterEditMode(node)">Rename Key</button>-->
-<!--    <button mat-menu-item (click)="removeKey(node)">Remove Key</button>-->
-<!--  </mat-menu>-->
-<!--</ng-template>-->
-
 <ng-template #inputTemplate let-node>
-  <mat-form-field style="width: 100%">
-    <input matInput placeholder="Please fill value" [formControl]="node.formControl" required>
+  <mat-form-field style="width: 70%">
+    <input matInput placeholder="Please fill value" [formControl]="node.formControl" required autofocus>
   </mat-form-field>
   <mat-icon class="item--clickable icon--green" (click)="updateKeyName(node)">done</mat-icon>
   <mat-icon class="item--clickable icon--red" (click)="exitEditMode(node)">close</mat-icon>

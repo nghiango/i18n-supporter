@@ -3,6 +3,7 @@ import {FileOptions} from './../models/file-options';
 import {Injectable} from '@angular/core';
 import {Builder} from '../shared/buider';
 import {JsonFlat} from 'src/app/models/json-flat';
+import {FormControl} from '@angular/forms';
 
 @Injectable({
   providedIn: 'root'
@@ -144,7 +145,9 @@ export class JsonService {
     }
   }
 
-  private addJsonFlat = (jsonFlats, name: string, path: string, parentPath: string, level: number, hasChildren = false, isExpanded: boolean = false): JsonFlat => {
+  private addJsonFlat = (jsonFlats, name: string, path: string,
+                         parentPath: string, level: number,
+                         hasChildren = false, isExpanded: boolean = false): JsonFlat => {
     if (hasChildren) {
       path += '.';
     }
@@ -156,6 +159,7 @@ export class JsonService {
         .level(level)
         .hasChildren(hasChildren)
         .isExpanded(isExpanded)
+        .formControl(new FormControl())
         .build();
     jsonFlats.push(jsonFlat);
     return jsonFlat;

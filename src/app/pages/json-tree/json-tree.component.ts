@@ -25,6 +25,7 @@ type SearchBy = 'key' | 'value';
 })
 export class JsonTreeComponent implements OnInit {
   public currentNode: JsonFlat;
+  private rightClickNode: JsonFlat;
   public files: FileDto[] = [];
   public dataSource: ArrayDataSource<JsonFlat>;
   public nodeHeader = '';
@@ -45,7 +46,12 @@ export class JsonTreeComponent implements OnInit {
       'duplicateOverlay': {
         'gender': 'Gender',
         'name': 'Nghia',
-        'what': 'in component'
+        'what': 'in component',
+        'deep': {
+          'deep1': {
+            'deep2': 'ok'
+          }
+        }
       }
     },
     'profile': {
@@ -68,7 +74,7 @@ export class JsonTreeComponent implements OnInit {
     public jsonService: JsonService,
     public fileService: FileService,
     public dialog: MatDialog,
-  ) {} 
+  ) {}
 
   @ViewChild('autosize', {static: false}) autosize: CdkTextareaAutosize;
 
@@ -223,13 +229,20 @@ export class JsonTreeComponent implements OnInit {
   }
 
   enterEditMode() {
+    if (this.currentNode) {
+      this.currentNode.editingKey = null;
+    }
+    this.openNodeFlat(this.rightClickNode);
+    this.currentNode.formControl.setValue(this.currentNode.name);
     this.editingKey = Date.now().toString();
     this.currentNode.editingKey = this.editingKey;
   }
 
   exitEditMode(node: JsonFlat) {
     this.editingKey = '';
+    node.editingKey = null;
     node.formControl.setValue(node.name);
+    this.currentJsonDictionary[node.path] = node.name;
   }
 
   updateKeyName(node: JsonFlat) {
@@ -303,13 +316,30 @@ export class JsonTreeComponent implements OnInit {
     });
   }
 
-  openNodeFlat(node: JsonFlat) {
+  private isOthersInEditMode(node: JsonFlat): boolean {
+    let isClose = true;
+    // Don't close if don't have a right click node
+    if (!this.rightClickNode) {
+      return false;
+    }
+    // Don't close if rightClickNode name equals the node want to open
+    if (this.rightClickNode.name === node.name) {
+      isClose = false;
+    }
+    // Close if right click on node, then left click to choose the node
+    if (this.currentNode && this.currentNode.name !== this.rightClickNode.name) {
+      isClose = true;
+    }
+    return isClose;
+  }
+
+  public openNodeFlat(node: JsonFlat): void {
+    if (this.isOthersInEditMode(node)) {
+      this.exitEditMode(this.currentNode);
+    }
     this.toggleNode(node);
     if (!node.hasChildren) {
-      if (this.currentNode) {
-        this.currentNode.selected = false;
-      }
-      this.currentNode = node;
+      this.setCurrentNode(node);
       this.nodeHeader = this.currentNode.name;
       node.selected = true;
       this.isReviewMode = false;
@@ -317,11 +347,19 @@ export class JsonTreeComponent implements OnInit {
     }
   }
 
+  private setCurrentNode(node: JsonFlat) {
+  if (this.currentNode) {
+    this.currentNode.selected = false;
+  }
+
+    this.currentNode = node;
+  }
+
   onRightClick(event: MouseEvent, node: JsonFlat) {
     this.contextMenuX = event.clientX;
     this.contextMenuY = event.clientY;
     this.contextMenu = !this.contextMenu;
-    this.currentNode = node;
+    this.rightClickNode = node;
   }
 
   disableContextMenu() {
