@@ -33,21 +33,19 @@
              (contextmenu)="onRightClick($event, node)" (click)="openNodeFlat(node)">
           <!-- Note that treeControl.toggle(node) is essentially what cdkTreeNodeToggle is doing under the hood -->
           <a style="width: 100%">
-            <span *ngIf="node.hasChildren" class="json-tree__expandable">
-              <mat-icon *ngIf="node.isExpanded">arrow_drop_down</mat-icon>
-              <mat-icon *ngIf="!node.isExpanded">arrow_right</mat-icon>
-              {{ node.name }}
-            </span>
-            <span *ngIf="!node.hasChildren" class="json-tree__leaf" [ngClass]="{'json-tree--active': node.selected}">
-              <span *ngIf="node.editingKey !== editingKey">
+            <div *ngIf="node.editingKey !== editingKey">
+              <span *ngIf="node.hasChildren" class="json-tree__expandable">
+                <mat-icon *ngIf="node.isExpanded">arrow_drop_down</mat-icon>
+                <mat-icon *ngIf="!node.isExpanded">arrow_right</mat-icon>
                 {{ node.name }}
               </span>
-              <div *ngIf="node.editingKey === editingKey">
-                <ng-container *ngTemplateOutlet="inputTemplate; context: {$implicit: node}"></ng-container>
-              </div>
-
-
-            </span>
+              <span *ngIf="!node.hasChildren" class="json-tree__leaf" [ngClass]="{'json-tree--active': node.selected}">
+                {{ node.name }}
+              </span>
+            </div>
+            <div *ngIf="node.editingKey === editingKey">
+              <ng-container *ngTemplateOutlet="inputTemplate; context: {$implicit: node}"></ng-container>
+            </div>
           </a>
         </div>
       </ng-container>
@@ -120,8 +118,8 @@
   <mat-form-field style="width: 70%">
     <input matInput placeholder="Please fill value" [formControl]="node.formControl" required autofocus>
   </mat-form-field>
-  <mat-icon class="item--clickable icon--green" (click)="updateKeyName(node)">done</mat-icon>
-  <mat-icon class="item--clickable icon--red" (click)="exitEditMode(node)">close</mat-icon>
+  <mat-icon class="item--clickable icon--green" (click)="updateKeyName(node, $event)">done</mat-icon>
+  <mat-icon class="item--clickable icon--red" (click)="exitEditMode(node, $event)">close</mat-icon>
 </ng-template>
 
 

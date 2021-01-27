@@ -35,7 +35,7 @@ export class JsonTreeComponent implements OnInit {
   private currentNestedJson: Object;
   private currentJsonFlats: JsonFlat[];
   private searchedJsonFlats: JsonFlat[];
-  private editingKey = '';
+  public editingKey = '';
   public filterControl = new FormControl();
   public searchOptionControl = new FormControl('value');
   private isDev = environment.isDev;
@@ -232,20 +232,26 @@ export class JsonTreeComponent implements OnInit {
     if (this.currentNode) {
       this.currentNode.editingKey = null;
     }
-    this.openNodeFlat(this.rightClickNode);
+    this.openNodeFlat(this.rightClickNode, false);
     this.currentNode.formControl.setValue(this.currentNode.name);
     this.editingKey = Date.now().toString();
     this.currentNode.editingKey = this.editingKey;
   }
 
-  exitEditMode(node: JsonFlat) {
+  exitEditMode(node: JsonFlat, event = null) {
+    if (event) {
+      event.stopPropagation();
+    }
     this.editingKey = '';
     node.editingKey = null;
     node.formControl.setValue(node.name);
     this.currentJsonDictionary[node.path] = node.name;
   }
 
-  updateKeyName(node: JsonFlat) {
+  updateKeyName(node: JsonFlat, event = null) {
+    if (event) {
+      event.stopPropagation();
+    }
     if (this.isNewKeyExistedInThisLevel(node) || node.formControl.invalid) {
       this.exitEditMode(node);
       alert('Your key is duplicated or blank, please change it!');
@@ -257,8 +263,9 @@ export class JsonTreeComponent implements OnInit {
       node.name = node.formControl.value;
       const oldPath = node.path;
       const newPath = node.path = this.jsonService.getCombinePath(node.name, node.path);
-      this.updateParentPathOfChildren(node);
+      this.updateParentPathOfChildren(node, oldPath);
       this.updatePathOfDictionary(oldPath, newPath);
+      this.openNodeFlat(this.currentNode, false);
     }
   }
 
@@ -281,11 +288,16 @@ export class JsonTreeComponent implements OnInit {
     this.files.forEach(file => file.nestedJsonContent = this.jsonService.buildJson(file.jsonDictionary));
   }
 
-  private updateParentPathOfChildren(parentNode: JsonFlat) {
-    const childNodes = this.getChildNodes(parentNode);
+  private updateParentPathOfChildren(parentNode: JsonFlat, oldPath: string) {
+    const childNodes = this.getChildNodes(parentNode, oldPath);
     if (childNodes) {
       // TODO: Should think again of update parent Path
-      // childNodes.forEach(node => node.parentPath = parentNode.path);
+      childNodes.forEach(node => {
+        node.parentPath = node.parentPath.replace(oldPath, parentNode.path);
+        const nodeChildOldPath = node.path;
+        node.path = node.path.replace(oldPath, parentNode.path);
+        this.updatePathOfDictionary(nodeChildOldPath, node.path);
+      });
     }
   }
 
@@ -336,16 +348,20 @@ export class JsonTreeComponent implements OnInit {
     return isClose;
   }
 
-  public openNodeFlat(node: JsonFlat): void {
+  public openNodeFlat(node: JsonFlat, isToggleNode: boolean = true): void {
     if (this.isOthersInEditMode(node)) {
       this.exitEditMode(this.currentNode);
     }
-    this.toggleNode(node);
+    if ( node.editingKey !== this.editingKey && isToggleNode) {
+      this.toggleNode(node);
+    }
+
+    this.setCurrentNode(node);
+    node.selected = true;
+    this.isReviewMode = false;
+
     if (!node.hasChildren) {
-      this.setCurrentNode(node);
       this.nodeHeader = this.currentNode.name;
-      node.selected = true;
-      this.isReviewMode = false;
       this.updateValueFormControl(this.files, node.path);
     }
   }
@@ -354,7 +370,6 @@ export class JsonTreeComponent implements OnInit {
   if (this.currentNode) {
     this.currentNode.selected = false;
   }
-
     this.currentNode = node;
   }
 
@@ -385,11 +400,15 @@ export class JsonTreeComponent implements OnInit {
     return null;
   }
 
-  private getChildNodes(node: JsonFlat): JsonFlat[] {
+  private getChildNodes(node: JsonFlat, oldPath: string = null): JsonFlat[] {
     const children = [];
     const nodeIndex = this.currentJsonFlats.indexOf(node);
+    let path = node.path;
+    if (oldPath) {
+      path = oldPath;
+    }
     for (let i = nodeIndex + 1; i < this.currentJsonFlats.length; i++) {
-      if (this.currentJsonFlats[i].parentPath.startsWith(node.path)) {
+      if (this.currentJsonFlats[i].parentPath.startsWith(path)) {
         children.push(this.currentJsonFlats[i]);
       } else {
         break;
