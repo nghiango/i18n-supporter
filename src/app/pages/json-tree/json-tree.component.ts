@@ -251,6 +251,9 @@ export class JsonTreeComponent implements OnInit {
       alert('Your key is duplicated or blank, please change it!');
     } else {
       this.editingKey = '';
+      if (node.name === node.formControl.value) {
+        return;
+      }
       node.name = node.formControl.value;
       const oldPath = node.path;
       const newPath = node.path = this.jsonService.getCombinePath(node.name, node.path);
