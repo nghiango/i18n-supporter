@@ -1,9 +1,9 @@
-import { fileOptions } from './../shared/global-variable';
-import { quoteWrapper } from './util';
-import { FileOptions } from './../models/file-options';
+import {quoteWrapper} from './util';
+import {FileOptions} from './../models/file-options';
 import {Injectable} from '@angular/core';
 import {Builder} from '../shared/buider';
-import { JsonFlat } from 'src/app/models/json-flat';
+import {JsonFlat} from 'src/app/models/json-flat';
+import {FormControl} from '@angular/forms';
 
 @Injectable({
   providedIn: 'root'
@@ -12,17 +12,26 @@ export class JsonService {
 
   constructor() { }
 
-  public buildJsonFlats(resource: Object, path: string, level: number, jsonFlats: any[]) {
+  /**
+   This function uses to build a list of JsonFlat object that serve the cdk-virtual-scroll-viewport
+   @param resource It is a nested JSON object
+   @param path The inital path should be ''
+   @param level The inital level should be 1
+   @param jsonFlats The inital jsonFlats should be []
+   @param expandedAll Put true when you want to expand all nodes.
+   @returns an array of JsonFlat object
+  */
+  public buildJsonFlats(resource: Object, path: string, level: number, jsonFlats: any[], expandedAll: boolean = false): JsonFlat[] {
     const parentPath = path;
     const rootLevel = level;
     for (const key in resource) {
       path += key;
       if (this.isObject(resource[key])) {
-        const jsonFlat = this.addJsonFlat(jsonFlats, key, path, parentPath, level, true);
+        const jsonFlat = this.addJsonFlat(jsonFlats, key, path, parentPath, level, true, expandedAll);
         path = jsonFlat.path;
-        this.buildJsonFlats(resource[key], path, ++level, jsonFlats);
+        this.buildJsonFlats(resource[key], path, ++level, jsonFlats, expandedAll);
       } else {
-        this.addJsonFlat(jsonFlats, key, path, parentPath, level);
+        this.addJsonFlat(jsonFlats, key, path, parentPath, level, false, expandedAll);
       }
       path = parentPath;
       level = rootLevel;
@@ -136,7 +145,9 @@ export class JsonService {
     }
   }
 
-  private addJsonFlat = (jsonFlats, name: string, path: string, parentPath: string, level: number, hasChildren = false): JsonFlat => {
+  private addJsonFlat = (jsonFlats, name: string, path: string,
+                         parentPath: string, level: number,
+                         hasChildren = false, isExpanded: boolean = false): JsonFlat => {
     if (hasChildren) {
       path += '.';
     }
@@ -147,8 +158,28 @@ export class JsonService {
         .parentPath(parentPath)
         .level(level)
         .hasChildren(hasChildren)
+        .isExpanded(isExpanded)
+        .formControl(new FormControl())
         .build();
     jsonFlats.push(jsonFlat);
     return jsonFlat;
+  }
+
+  public prepareDataForSearching(jsonDic: Object) {
+    const dataForSearchValue: Map<string, string[]> = new Map<string, string[]>();
+    const dataForSearchKey: string[] = [];
+    Object.keys(jsonDic).forEach(key => {
+      dataForSearchKey.push(key);
+      const value = jsonDic[key].toLowerCase();
+      if (dataForSearchValue[value]) {
+        dataForSearchValue[value] = [...dataForSearchValue[value], key];
+      } else {
+        dataForSearchValue[value] = [key];
+      }
+    });
+    return {
+      dataForSearchValue: dataForSearchValue,
+      dataForSearchKey: dataForSearchKey
+    };
   }
 }
