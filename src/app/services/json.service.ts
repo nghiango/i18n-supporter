@@ -167,9 +167,7 @@ export class JsonService {
 
   public prepareDataForSearching(jsonDic: Object) {
     const dataForSearchValue: Map<string, string[]> = new Map<string, string[]>();
-    const dataForSearchKey: string[] = [];
     Object.keys(jsonDic).forEach(key => {
-      dataForSearchKey.push(key);
       const value = jsonDic[key].toLowerCase();
       if (dataForSearchValue[value]) {
         dataForSearchValue[value] = [...dataForSearchValue[value], key];
@@ -178,8 +176,7 @@ export class JsonService {
       }
     });
     return {
-      dataForSearchValue: dataForSearchValue,
-      dataForSearchKey: dataForSearchKey
+      dataForSearchValue: dataForSearchValue
     };
   }
 }

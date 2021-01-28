@@ -22,24 +22,29 @@ the display of tree, and language content when you choose a node.
         - Show diff between two file (original and result)
         - Design front-end better.
 2. Json tree
-    1. Finish
-        - Show tree of json file and show content of node when choose key.
-        - Combine imported json files to create the tree.
-        - Remove a key of all files or one file.
-        - Show content of combine json files, if one file is missing the key the content
-        of this file should show the plus icon or something to add this key to the file.
-        - Implement rename for a node
-    2. Pending
-        - Function import and export json files.
-        - Create the key for all files or one file.
-    3. Progress
-        - Create overlay to add a new key which can choose the default value for each file.
+  1. Finish
+    - Show tree of json file and show content of node when choose key.
+    - Combine imported json files to create the tree.
+    - Remove a key of all files or one file.
+    - Show content of combine json files, if one file is missing the key the content
+    of this file should show the plus icon or something to add this key to the file.
+    - Implement rename for a node
+    - Function import and export json files.
+    - Create the key for all files or one file.
+    - Create overlay to add a new key which can choose the default value for each file.
+  2. Pending
+     - Allow adding a new node without any file and node initialized
+  3. Progress
+    - Support multi tenant
        
 # How to use
 
-- This project use angular to `serve` the app. So you need to install some Angular
-required, and then `serve` it with command:
-> ng serve or npm run start
+- This project use angular to serve the app, so you need to install the `node_modules` by command
+> npm i
+- Then run the command to build angular source code, and using electron to serve the source by command
+> npm run electron
+
+- Running `npm run start` to get the default for the developer, but you can not interact with files(that means you can't import and export file).
 
 - To run automation test:;
 > ng e2e
