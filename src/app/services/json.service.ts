@@ -21,17 +21,18 @@ export class JsonService {
    @param expandedAll Put true when you want to expand all nodes.
    @returns an array of JsonFlat object
   */
-  public buildJsonFlats(resource: Object, path: string, level: number, jsonFlats: any[], expandedAll: boolean = false): JsonFlat[] {
+  public buildJsonFlats(resource: Object, path: string, parentNode: JsonFlat,
+                        level: number, jsonFlats: any[], expandedAll: boolean = false): JsonFlat[] {
     const parentPath = path;
     const rootLevel = level;
     for (const key in resource) {
       path += key;
-      if (this.isObject(resource[key])) {
-        const jsonFlat = this.addJsonFlat(jsonFlats, key, path, parentPath, level, true, expandedAll);
+      if (this.isParentNode(resource[key])) {
+        const jsonFlat = this.addJsonFlat(jsonFlats, key, path, parentNode, level, true, expandedAll);
         path = jsonFlat.path;
-        this.buildJsonFlats(resource[key], path, ++level, jsonFlats, expandedAll);
+        this.buildJsonFlats(resource[key], path, jsonFlat, ++level, jsonFlats, expandedAll);
       } else {
-        this.addJsonFlat(jsonFlats, key, path, parentPath, level, false, expandedAll);
+        this.addJsonFlat(jsonFlats, key, path, parentNode, level, false, expandedAll);
       }
       path = parentPath;
       level = rootLevel;
@@ -39,7 +40,7 @@ export class JsonService {
     return jsonFlats;
   }
 
-  public isObject(object) {
+  public isParentNode(object) {
     return object && typeof object === 'object';
   }
 
@@ -115,7 +116,7 @@ export class JsonService {
 
   public formatJsonString(nestedJsonContent: {}, fileOptions: FileOptions = null)  {
 
-    if(fileOptions && !fileOptions.tab) {
+    if (fileOptions && !fileOptions.tab) {
       return JSON.stringify(nestedJsonContent, null, fileOptions.indentWidth);
     }
     return JSON.stringify(nestedJsonContent, null, '\t');
@@ -145,8 +146,7 @@ export class JsonService {
     }
   }
 
-  private addJsonFlat = (jsonFlats, name: string, path: string,
-                         parentPath: string, level: number,
+  private addJsonFlat = (jsonFlats, name: string, path: string, parentNode: JsonFlat, level: number,
                          hasChildren = false, isExpanded: boolean = false): JsonFlat => {
     if (hasChildren) {
       path += '.';
@@ -155,7 +155,7 @@ export class JsonService {
       Builder(JsonFlat)
         .name(name)
         .path(path)
-        .parentPath(parentPath)
+        .parentNode(parentNode)
         .level(level)
         .hasChildren(hasChildren)
         .isExpanded(isExpanded)

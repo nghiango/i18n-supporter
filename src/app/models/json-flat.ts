@@ -3,7 +3,7 @@ import { FormControl } from '@angular/forms';
 export class JsonFlat {
   name: string;
   path: string;
-  parentPath: string;
+  parentNode: JsonFlat;
   level: number;
   hasChildren: boolean;
   selected: boolean;

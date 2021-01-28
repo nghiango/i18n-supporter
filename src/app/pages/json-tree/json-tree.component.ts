@@ -105,7 +105,7 @@ export class JsonTreeComponent implements OnInit {
       const keys = this.currentSearchValueData[value];
       if (keys && keys.length > 0) {
         keys.forEach(key => this.searchedJsonDic[key] = this.currentJsonDictionary[key]);
-        this.searchedJsonFlats = this.jsonService.buildJsonFlats(unflatten(this.searchedJsonDic), '', 1, [], true);
+        this.searchedJsonFlats = this.jsonService.buildJsonFlats(unflatten(this.searchedJsonDic), '', null, 1, [], true);
       }
     }
 
@@ -172,7 +172,7 @@ export class JsonTreeComponent implements OnInit {
       this.currentJsonDictionary = this.jsonService.mergeKeys(this.currentJsonDictionary, jsonDictionary);
       this.currentNestedJson = unflatten(this.currentJsonDictionary);
     }
-    this.currentJsonFlats = this.jsonService.buildJsonFlats(this.currentNestedJson, '', 1, []);
+    this.currentJsonFlats = this.jsonService.buildJsonFlats(this.currentNestedJson, '', null, 1, []);
   }
 
   private updateJsonTreeData(jsonFlats: JsonFlat[]) {
@@ -185,26 +185,36 @@ export class JsonTreeComponent implements OnInit {
     file.formControl.enable();
   }
 
-  removeKeyInFile(file: FileDto) {
-    delete file.jsonDictionary[this.currentNode.path];
+  removeKeyInFile(file: FileDto, path: string) {
+    delete file.jsonDictionary[path];
     file.notExisted = true;
     file.formControl.disable();
     file.formControl.setValue('');
   }
 
+  // TODO: Check case remove a child of one-child parent
   removeKey() {
+    if (this.rightClickNode.hasChildren) {
+      this.removeChildKeys(this.rightClickNode);
+    } else {
+      const parent = this.rightClickNode.parentNode;
+      const children = this.getChildNodes(parent);
+      if (children.length === 1) {
+        parent.hasChildren = false;
+      }
+    }
     this.files.forEach(file => {
-      this.removeKeyInFile(file);
+      this.removeKeyInFile(file, this.rightClickNode.path);
     });
-    this.currentJsonFlats = this.removeNode(this.currentNode, this.currentJsonFlats);
+    this.currentJsonFlats = this.removeNode(this.rightClickNode.path, this.currentJsonFlats);
     this.updateJsonTreeData(this.currentJsonFlats);
-    this.currentNode = null;
+    this.rightClickNode = null;
     this.nodeHeader = '';
   }
 
-  private removeNode = (node: JsonFlat, jsonFlats: JsonFlat[]): JsonFlat[] => {
+  private removeNode = (path: string, jsonFlats: JsonFlat[]): JsonFlat[] => {
     for (let i = 0; i < jsonFlats.length; i++) {
-      if (jsonFlats[i].path === node.path) {
+      if (jsonFlats[i].path === path) {
         jsonFlats.splice(i, 1);
         break;
       }
@@ -270,7 +280,7 @@ export class JsonTreeComponent implements OnInit {
   }
 
   private isNewKeyExistedInThisLevel(node: JsonFlat) {
-    const parentNode = this.getParentNode(node);
+    const parentNode = node.parentNode;
     if (parentNode) {
       const childrenNodes = this.getChildNodes(parentNode);
       for (let i = 0; i < childrenNodes.length; i++) {
@@ -291,9 +301,7 @@ export class JsonTreeComponent implements OnInit {
   private updateParentPathOfChildren(parentNode: JsonFlat, oldPath: string) {
     const childNodes = this.getChildNodes(parentNode, oldPath);
     if (childNodes) {
-      // TODO: Should think again of update parent Path
       childNodes.forEach(node => {
-        node.parentPath = node.parentPath.replace(oldPath, parentNode.path);
         const nodeChildOldPath = node.path;
         node.path = node.path.replace(oldPath, parentNode.path);
         this.updatePathOfDictionary(nodeChildOldPath, node.path);
@@ -341,6 +349,10 @@ export class JsonTreeComponent implements OnInit {
     if (this.rightClickNode.name === node.name) {
       isClose = false;
     }
+
+    if (!this.currentNode) {
+      return false;
+    }
     // Close if right click on node, then left click to choose the node
     if (this.currentNode && this.currentNode.name !== this.rightClickNode.name) {
       isClose = true;
@@ -385,19 +397,8 @@ export class JsonTreeComponent implements OnInit {
   }
 
   public shouldRender(node: JsonFlat): boolean {
-    const parent = this.getParentNode(node);
+    const parent = node.parentNode;
     return !parent || parent.isExpanded;
-  }
-
-  private getParentNode(node: JsonFlat): JsonFlat {
-    const jsonFlats = this.searchedJsonFlats ? this.searchedJsonFlats : this.currentJsonFlats;
-    const nodeIndex = jsonFlats.indexOf(node);
-    for (let i = nodeIndex - 1; i >= 0; i--) {
-      if (jsonFlats[i].level === node.level - 1) {
-        return jsonFlats[i];
-      }
-    }
-    return null;
   }
 
   private getChildNodes(node: JsonFlat, oldPath: string = null): JsonFlat[] {
@@ -408,7 +409,7 @@ export class JsonTreeComponent implements OnInit {
       path = oldPath;
     }
     for (let i = nodeIndex + 1; i < this.currentJsonFlats.length; i++) {
-      if (this.currentJsonFlats[i].parentPath.startsWith(path)) {
+      if (this.currentJsonFlats[i].parentNode?.path.startsWith(path)) {
         children.push(this.currentJsonFlats[i]);
       } else {
         break;
@@ -421,5 +422,15 @@ export class JsonTreeComponent implements OnInit {
     const { dataForSearchValue, dataForSearchKey } = this.jsonService.prepareDataForSearching(this.currentJsonDictionary);
     this.currentSearchKeyData = dataForSearchKey;
     this.currentSearchValueData = dataForSearchValue;
+  }
+
+  private removeChildKeys(parentNode: JsonFlat) {
+    const children = this.getChildNodes(parentNode);
+    children.forEach(node => {
+      this.files.forEach(file => {
+        this.removeKeyInFile(file, node.path);
+      });
+      this.currentJsonFlats = this.removeNode(node.path, this.currentJsonFlats);
+    });
   }
 }

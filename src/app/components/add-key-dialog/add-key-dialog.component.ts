@@ -46,7 +46,7 @@ export class AddKeyDialogComponent implements OnInit {
                   .name(this.nodeName.value)
                   .level(nodeLevel)
                   .path(path)
-                  .parentPath(this.node.path)
+                  .parentNode(this.node)
                   .formControl(new FormControl(this.nodeName.value, Validators.required))
                   .build();
     this.dialogRef.close(node);
