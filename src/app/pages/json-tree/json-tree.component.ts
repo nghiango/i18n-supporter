@@ -39,8 +39,7 @@ export class JsonTreeComponent implements OnInit {
   public filterControl = new FormControl();
   public searchOptionControl = new FormControl('value');
   private isDev = environment.isDev;
-  public searchPlaceholder = 'Search by value';
-  private searchBy: SearchBy = 'value';
+  public searchBy: SearchBy = 'value';
   private toTest = {
     'components': {
       'duplicateOverlay': {
@@ -67,8 +66,8 @@ export class JsonTreeComponent implements OnInit {
   public contextMenu: boolean;
 
   private subscription = new Subscription();
-  private currentSearchKeyData: string[];
   private currentSearchValueData: Map<string, string[]>;
+  private currentSearchString: string;
 
   constructor(
     public jsonService: JsonService,
@@ -83,11 +82,17 @@ export class JsonTreeComponent implements OnInit {
     this.subscription.add(this.filterControl.valueChanges.pipe(
       debounceTime(500),
       distinctUntilChanged()
-    ).subscribe(value => this.filterNode(value, this.searchBy)));
+    ).subscribe(value => {
+      this.currentSearchString = value;
+      this.filterNode(this.currentSearchString , this.searchBy);
+    }));
     this.subscription.add(this.searchOptionControl.valueChanges.pipe(
       debounceTime(200),
       distinctUntilChanged()
-    ).subscribe(value => this.searchBy = value));
+    ).subscribe(searchBy => {
+      this.searchBy = searchBy;
+      this.filterNode(this.currentSearchString , this.searchBy);
+    }));
     if (this.isDev) {
       const jsonDictionary = flatten(this.toTest);
       const fileDto = new FileDto('test', 'test', jsonDictionary, new FormControl());
@@ -98,13 +103,20 @@ export class JsonTreeComponent implements OnInit {
     }
   }
 
-  private filterNode(value: string, searchBy: SearchBy = 'value'): void {
+  private filterNode(input: string, searchBy: SearchBy = 'value'): void {
     this.searchedJsonDic = {};
     this.searchedJsonFlats = null;
     if (this.currentSearchValueData && searchBy === 'value') {
-      const keys = this.currentSearchValueData[value];
+      const keys = this.currentSearchValueData[input];
       if (keys && keys.length > 0) {
         keys.forEach(key => this.searchedJsonDic[key] = this.currentJsonDictionary[key]);
+        this.searchedJsonFlats = this.jsonService.buildJsonFlats(unflatten(this.searchedJsonDic), '', null, 1, [], true);
+      }
+    }
+    if (searchBy === 'key') {
+      const value = this.currentJsonDictionary[input];
+      if (value) {
+        this.searchedJsonDic[input] = value;
         this.searchedJsonFlats = this.jsonService.buildJsonFlats(unflatten(this.searchedJsonDic), '', null, 1, [], true);
       }
     }
@@ -419,8 +431,7 @@ export class JsonTreeComponent implements OnInit {
   }
 
   private prepareDataForSearching() {
-    const { dataForSearchValue, dataForSearchKey } = this.jsonService.prepareDataForSearching(this.currentJsonDictionary);
-    this.currentSearchKeyData = dataForSearchKey;
+    const { dataForSearchValue } = this.jsonService.prepareDataForSearching(this.currentJsonDictionary);
     this.currentSearchValueData = dataForSearchValue;
   }
 

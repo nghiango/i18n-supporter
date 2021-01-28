@@ -7,7 +7,7 @@
       </mat-radio-group>
     </div>
     <div class="json-tree__sidenav-header">
-      <input type="text" placeholder="{{searchPlaceholder}}" id="filterNode" [formControl]="filterControl"/>
+      <input type="text" placeholder="Search by {{searchBy}}" id="filterNode" [formControl]="filterControl"/>
       <div class="json-tree__menu-btn">
         <button mat-flat-button color="primary" [matMenuTriggerFor]="menu">Menu</button>
         <mat-menu #menu="matMenu">
