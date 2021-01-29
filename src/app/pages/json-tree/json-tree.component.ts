@@ -67,6 +67,7 @@ export class JsonTreeComponent implements OnInit {
 
   private subscription = new Subscription();
   private currentSearchValueData: Map<string, string[]>;
+  private currentSearchKeyData: Map<string, string[]>;
   private currentSearchString: string;
 
   constructor(
@@ -115,9 +116,15 @@ export class JsonTreeComponent implements OnInit {
     }
     if (searchBy === 'key') {
       const value = this.currentJsonDictionary[input];
+      const keys = this.currentSearchKeyData[input];
       if (value) {
         this.searchedJsonDic[input] = value;
         this.searchedJsonFlats = this.jsonService.buildJsonFlats(unflatten(this.searchedJsonDic), '', null, 1, [], true);
+      } else if (keys) {
+        if (keys && keys.length > 0) {
+          keys.forEach(key => this.searchedJsonDic[key] = this.currentJsonDictionary[key]);
+          this.searchedJsonFlats = this.jsonService.buildJsonFlats(unflatten(this.searchedJsonDic), '', null, 1, [], true);
+        }
       }
     }
 
@@ -431,8 +438,9 @@ export class JsonTreeComponent implements OnInit {
   }
 
   private prepareDataForSearching() {
-    const { dataForSearchValue } = this.jsonService.prepareDataForSearching(this.currentJsonDictionary);
+    const { dataForSearchValue, dataForSearchKey } = this.jsonService.prepareDataForSearching(this.currentJsonDictionary);
     this.currentSearchValueData = dataForSearchValue;
+    this.currentSearchKeyData = dataForSearchKey;
   }
 
   private removeChildKeys(parentNode: JsonFlat) {
