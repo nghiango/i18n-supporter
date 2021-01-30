@@ -70,6 +70,7 @@ export class JsonTreeComponent implements OnInit {
   private currentSearchKeyData: Map<string, string[]>;
   private currentSearchString: string;
 
+
   constructor(
     public jsonService: JsonService,
     public fileService: FileService,
@@ -77,6 +78,7 @@ export class JsonTreeComponent implements OnInit {
   ) {}
 
   @ViewChild('autosize', {static: false}) autosize: CdkTextareaAutosize;
+  @ViewChild('fileImport') fileImport;
 
   ngOnInit() {
     currentPath.next('json-tree');
@@ -340,11 +342,12 @@ export class JsonTreeComponent implements OnInit {
   }
 
   clearAll() {
-    this.currentJsonFlats = null;
+    this.currentJsonFlats = [];
     this.currentJsonDictionary = null;
     this.currentNestedJson = null;
     this.currentNode = null;
     this.files = [];
+    this.fileImport.nativeElement.value = '';
     this.updateJsonTreeData(this.currentJsonFlats);
   }
 
