@@ -7,11 +7,13 @@
     "angular:quickdev": "ng serve --open --port=4200",
     "angular:integrate": "ng serve -c integrate --port=4201",
     "electron:integrate": "electron .",
-    "build": "node ./build/clean-build.js && ng build --prod -c electron --base-href ./ ",
+    "angular:build": "node ./build/clean-build.js && ng build --prod -c electron --base-href ./ ",
+    "electron:build": "tsc --p electron",
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "electron:sever": "npm run build && tsc --p electron && electron ."
+    "electron:build-all": "npm run angular:build && npm run electron:build",
+    "electron:package": "npm run electron:build-all && electron-packager . --overwrite --platform=linux --arch=x64 --prune=true --out=release-builds"
   },
   "private": true,
   "dependencies": {
@@ -45,6 +47,7 @@
     "@types/node": "^12.11.1",
     "codelyzer": "^5.1.2",
     "electron": "^9.4.0",
+    "electron-packager": "^15.2.0",
     "jasmine-core": "~3.5.0",
     "jasmine-spec-reporter": "~5.0.0",
     "karma": "~5.0.0",
