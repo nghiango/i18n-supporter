@@ -66,6 +66,15 @@
                 }
               ]
             },
+            "integrate": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.integrate.ts"
+                }
+              ],
+              "aot": true
+            },
             "electron": {
               "fileReplacements": [
                 {
@@ -102,8 +111,11 @@
             "browserTarget": "i18n-supporter:build"
           },
           "configurations": {
-            "production": {
-              "browserTarget": "i18n-supporter:build:production"
+            "electron": {
+              "browserTarget": "i18n-supporter:build:electron"
+            },
+            "integrate": {
+              "browserTarget": "i18n-supporter:build:integrate"
             }
           }
         },
