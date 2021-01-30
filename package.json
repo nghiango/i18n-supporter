@@ -1,6 +1,6 @@
 {
   "name": "i18n-supporter",
-  "version": "0.1.0",
+  "version": "0.2.0-SNAPSHOT",
   "main": "electron/dist/electron/src/main.js",
   "scripts": {
     "ng": "ng",
