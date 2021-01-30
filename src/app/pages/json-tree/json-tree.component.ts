@@ -100,7 +100,7 @@ export class JsonTreeComponent implements OnInit {
       this.files.push(fileDto);
       this.initJsonTree(this.toTest, Object.assign({}, jsonDictionary));
       this.updateJsonTreeData(this.currentJsonFlats);
-      this.prepareDataForSearching();
+      this.prepareDataKeyForSearching(jsonDictionary);
     }
   }
 
@@ -175,12 +175,13 @@ export class JsonTreeComponent implements OnInit {
         this.files.push(fileDto);
         this.initJsonTree(jsonObject, Object.assign({}, jsonDictionary));
         count++;
+        this.prepareDataValueForSearching(jsonDictionary);
         if (count === fileImports.length) {
           this.updateJsonTreeData(this.currentJsonFlats);
+          this.prepareDataKeyForSearching(this.currentJsonDictionary);
         }
       });
     });
-    this.prepareDataForSearching();
   }
 
   private initJsonTree(jsonObject, jsonDictionary) {
@@ -437,10 +438,12 @@ export class JsonTreeComponent implements OnInit {
     return children;
   }
 
-  private prepareDataForSearching() {
-    const { dataForSearchValue, dataForSearchKey } = this.jsonService.prepareDataForSearching(this.currentJsonDictionary);
-    this.currentSearchValueData = dataForSearchValue;
-    this.currentSearchKeyData = dataForSearchKey;
+  private prepareDataKeyForSearching(jsonDic: Object) {
+    this.currentSearchKeyData  = this.jsonService.prepareDataForSearching(this.currentSearchKeyData, jsonDic, 'key');
+  }
+
+  private prepareDataValueForSearching(jsonDic: Object) {
+    this.currentSearchValueData  = this.jsonService.prepareDataForSearching(this.currentSearchValueData, jsonDic);
   }
 
   private removeChildKeys(parentNode: JsonFlat) {

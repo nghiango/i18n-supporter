@@ -165,28 +165,22 @@ export class JsonService {
     return jsonFlat;
   }
 
-  public prepareDataForSearching(jsonDic: Object) {
-    const dataForSearchValue: Map<string, string[]> = new Map<string, string[]>();
-    const dataForSearchKey:  Map<string, string[]> = new Map<string, string[]>();
+  public prepareDataForSearching(data: Map<string, string[]>, jsonDic: Object, searchBy: string = 'value') {
+    if (!data) {
+      data =  new Map<string, string[]>();
+    }
     Object.keys(jsonDic).forEach(key => {
-      const keyArr = key.split('.');
-      const lastKey = keyArr[keyArr.length - 1];
-      if (dataForSearchKey[lastKey]) {
-        dataForSearchKey[lastKey] = [...dataForSearchKey[lastKey], key];
-      } else {
-        dataForSearchKey[lastKey] = [key];
+      let valueOrKey = jsonDic[key].toLowerCase();
+      if (searchBy === 'key') {
+        const keyArr = key.split('.');
+        valueOrKey = keyArr[keyArr.length - 1];
       }
-
-      const value = jsonDic[key].toLowerCase();
-      if (dataForSearchValue[value]) {
-        dataForSearchValue[value] = [...dataForSearchValue[value], key];
+      if (data[valueOrKey]) {
+        data[valueOrKey] = [...data[valueOrKey], key];
       } else {
-        dataForSearchValue[value] = [key];
+        data[valueOrKey] = [key];
       }
     });
-    return {
-      dataForSearchValue: dataForSearchValue,
-      dataForSearchKey: dataForSearchKey
-    };
+    return data;
   }
 }

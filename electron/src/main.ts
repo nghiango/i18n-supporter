@@ -1,7 +1,7 @@
 import { app, BrowserWindow } from 'electron';
-import * as url from 'url';
-import { joinPath } from './services/path.service';
 import registerEvents from './services/ipc-main.service';
+import {joinPath} from './services/path.service';
+import * as url from 'url';
 
 let win: BrowserWindow;
 
@@ -23,15 +23,19 @@ function createWindow() {
     height: 768,
     webPreferences: { nodeIntegration: true }
   });
-
-  win.loadURL(
-    url.format({
-      pathname: joinPath(__dirname, `/../../../../dist/i18n-supporter/index.html`),
-      protocol: 'file:',
-      slashes: true
-    })
-  );
-
+  if (process.env.DEVELOPMENT_MODE) {
+    win.loadURL(
+      'http://localhost:4201'
+    );
+  } else {
+    win.loadURL(
+      url.format({
+        pathname: joinPath(__dirname, `/../../../../dist/i18n-supporter/index.html`),
+        protocol: 'file:',
+        slashes: true
+      })
+    );
+  }
   win.webContents.openDevTools();
 
   win.on('closed', () => {
