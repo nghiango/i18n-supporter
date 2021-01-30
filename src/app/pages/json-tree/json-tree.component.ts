@@ -293,7 +293,7 @@ export class JsonTreeComponent implements OnInit {
       node.name = node.formControl.value;
       const oldPath = node.path;
       const newPath = node.path = this.jsonService.getCombinePath(node.name, node.path);
-      this.updateParentPathOfChildren(node, oldPath);
+      this.updateParentPathForChildren(node, oldPath);
       this.updatePathOfDictionary(oldPath, newPath);
       this.openNodeFlat(this.currentNode, false);
     }
@@ -318,13 +318,16 @@ export class JsonTreeComponent implements OnInit {
     this.files.forEach(file => file.nestedJsonContent = this.jsonService.buildJson(file.jsonDictionary));
   }
 
-  private updateParentPathOfChildren(parentNode: JsonFlat, oldPath: string) {
-    const childNodes = this.getChildNodes(parentNode, oldPath);
+  private updateParentPathForChildren(parentNode: JsonFlat, oldPath: string) {
+    const childNodes = this.getChildNodes(parentNode);
     if (childNodes) {
       childNodes.forEach(node => {
         const nodeChildOldPath = node.path;
         node.path = node.path.replace(oldPath, parentNode.path);
         this.updatePathOfDictionary(nodeChildOldPath, node.path);
+        if (node.hasChildren) {
+          this.updateParentPathForChildren(node, nodeChildOldPath);
+        }
       });
     }
   }
@@ -421,17 +424,14 @@ export class JsonTreeComponent implements OnInit {
     return !parent || parent.isExpanded;
   }
 
-  private getChildNodes(node: JsonFlat, oldPath: string = null): JsonFlat[] {
+  private getChildNodes(parentNode: JsonFlat): JsonFlat[] {
     const children = [];
-    const nodeIndex = this.currentJsonFlats.indexOf(node);
-    let path = node.path;
-    if (oldPath) {
-      path = oldPath;
-    }
-    for (let i = nodeIndex + 1; i < this.currentJsonFlats.length; i++) {
-      if (this.currentJsonFlats[i].parentNode?.path.startsWith(path)) {
+    const parentNodeIndex = this.currentJsonFlats.indexOf(parentNode);
+    for (let i = parentNodeIndex + 1; i < this.currentJsonFlats.length; i++) {
+      const node = this.currentJsonFlats[i];
+      if (node.parentNode === parentNode) {
         children.push(this.currentJsonFlats[i]);
-      } else {
+      } else if (node.level === parentNode.level) {
         break;
       }
     }
