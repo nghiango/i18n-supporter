@@ -188,7 +188,7 @@ export class JsonTreeComponent implements OnInit {
 
   private initJsonTree(jsonObject, jsonDictionary) {
     if (isNullOrUndefined(this.currentNestedJson)) {
-      this.currentNestedJson = jsonObject;
+      this.currentNestedJson = unflatten(jsonObject);
       this.currentJsonDictionary = jsonDictionary;
     } else {
       this.currentJsonDictionary = this.jsonService.mergeKeys(this.currentJsonDictionary, jsonDictionary);
