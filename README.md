@@ -42,7 +42,9 @@ the display of tree, and language content when you choose a node.
 - This project use angular to serve the app, so you need to install the `node_modules` by command
 > npm i
 - Then run the command to build angular source code, and using electron to serve the source by command
-> npm run electron
+> npm run angular:integrate
+> 
+> npm run electron:integrate
 
 - Running `npm run start` to get the default for the developer, but you can not interact with files(that means you can't import and export file).
 

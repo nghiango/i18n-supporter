@@ -61,6 +61,9 @@ export class JsonTreeComponent implements OnInit {
       }
     }
   };
+
+  private contextMenuX: number;
+  private contextMenuY: number;
   public contextMenu: boolean;
 
   private subscription = new Subscription();
