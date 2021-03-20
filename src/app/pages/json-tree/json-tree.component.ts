@@ -1,21 +1,21 @@
-import {environment} from '../../../environments/environment';
-import {ArrayDataSource} from '@angular/cdk/collections';
-import {CdkTextareaAutosize} from '@angular/cdk/text-field';
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, ViewChild} from '@angular/core';
-import {FormControl} from '@angular/forms';
-import {MatDialog} from '@angular/material/dialog';
-import {flatten, unflatten} from 'flat';
-import {Subscription} from 'rxjs';
-import {isNullOrUndefined} from 'src/app/services/util';
-import {insert} from 'src/app/shared/arrays';
+import { environment } from '../../../environments/environment';
+import { ArrayDataSource } from '@angular/cdk/collections';
+import { CdkTextareaAutosize } from '@angular/cdk/text-field';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
+import { FormControl } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
+import { flatten, unflatten } from 'flat';
+import { Subscription } from 'rxjs';
+import { isNullOrUndefined } from 'src/app/services/util';
+import { insert } from 'src/app/shared/arrays';
 
-import {AddKeyDialogComponent} from '../../components/add-key-dialog/add-key-dialog.component';
-import {FileDto} from '../../models/file-dto';
-import {JsonFlat} from '../../models/json-flat';
-import {FileService} from '../../services/file.service';
-import {JsonService} from '../../services/json.service';
-import {currentPath, fileOptions} from '../../shared/global-variable';
-import {debounceTime, distinctUntilChanged} from 'rxjs/operators';
+import { AddKeyDialogComponent } from '../../components/add-key-dialog/add-key-dialog.component';
+import { FileDto } from '../../models/file-dto';
+import { JsonFlat } from '../../models/json-flat';
+import { FileService } from '../../services/file.service';
+import { JsonService } from '../../services/json.service';
+import { currentPath, fileOptions } from '../../shared/global-variable';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 type SearchBy = 'key' | 'value';
 @Component({
