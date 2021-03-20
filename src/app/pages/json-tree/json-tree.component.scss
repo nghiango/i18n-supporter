@@ -23,7 +23,7 @@
   }
 
   &__virtual-scroll-container {
-    height: 94%;
+    height: calc(100% - 115px);
     overflow: auto;
   }
 

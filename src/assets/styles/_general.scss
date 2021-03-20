@@ -12,6 +12,34 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 .orange-background {
   background: linear-gradient(to right, #fe9365, #feb798);
 }
+.json-tree {
+  .mat-drawer-inner-container {
+    overflow: hidden;
+  }
+}
+
+
+/* width */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
 
 .icon {
   &__medium {
