@@ -1,7 +1,7 @@
 import {environment} from '../../../environments/environment';
 import {ArrayDataSource} from '@angular/cdk/collections';
 import {CdkTextareaAutosize} from '@angular/cdk/text-field';
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, ViewChild} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {MatDialog} from '@angular/material/dialog';
 import {flatten, unflatten} from 'flat';
@@ -21,7 +21,8 @@ type SearchBy = 'key' | 'value';
 @Component({
   selector: 'json-json-tree',
   templateUrl: './json-tree.component.html',
-  styleUrls: ['./json-tree.component.scss']
+  styleUrls: ['./json-tree.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class JsonTreeComponent implements OnInit {
   public currentNode: JsonFlat;
@@ -60,9 +61,6 @@ export class JsonTreeComponent implements OnInit {
       }
     }
   };
-
-  private contextMenuX: number;
-  private contextMenuY: number;
   public contextMenu: boolean;
 
   private subscription = new Subscription();
@@ -75,6 +73,7 @@ export class JsonTreeComponent implements OnInit {
     public jsonService: JsonService,
     public fileService: FileService,
     public dialog: MatDialog,
+    public changeRef: ChangeDetectorRef
   ) {}
 
   @ViewChild('autosize', {static: false}) autosize: CdkTextareaAutosize;
@@ -182,6 +181,7 @@ export class JsonTreeComponent implements OnInit {
           this.updateJsonTreeData(this.currentJsonFlats);
           this.prepareDataKeyForSearching(this.currentJsonDictionary);
         }
+        this.changeRef.markForCheck();
       });
     });
   }
@@ -257,6 +257,7 @@ export class JsonTreeComponent implements OnInit {
       let parentIndex = this.currentJsonFlats.indexOf(this.currentNode);
       insert(this.currentJsonFlats, ++parentIndex, value);
       this.updateJsonTreeData(this.currentJsonFlats);
+      this.changeRef.markForCheck();
     });
   }
 
