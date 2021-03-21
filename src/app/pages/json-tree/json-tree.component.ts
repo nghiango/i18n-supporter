@@ -251,13 +251,13 @@ export class JsonTreeComponent implements OnInit {
     this.dialog.open(AddKeyDialogComponent, {
       data: {
         files: this.files,
-        node: this.currentNode
+        node: this.rightClickNode
       }
     }).afterClosed().subscribe(value => {
       if (!value) {
         return;
       }
-      let parentIndex = this.currentJsonFlats.indexOf(this.currentNode);
+      let parentIndex = this.currentJsonFlats.indexOf(this.rightClickNode);
       insert(this.currentJsonFlats, ++parentIndex, value);
       this.updateJsonTreeData(this.currentJsonFlats);
       this.changeRef.markForCheck();

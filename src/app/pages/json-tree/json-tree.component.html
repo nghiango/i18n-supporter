@@ -25,7 +25,7 @@
       </div>
     </div>
 
-    <cdk-virtual-scroll-viewport class="json-tree__virtual-scroll-container" itemSize="0" oncontextmenu="return false;">
+    <cdk-virtual-scroll-viewport class="json-tree__virtual-scroll-container" itemSize="1" oncontextmenu="return false;">
       <ng-container *cdkVirtualFor="let node of dataSource; templateCacheSize: 1000">
         <!-- Note that the [style.padding-left] is essentially what cdkTreeNodePadding is doing under the hood -->
         <div [style.display]="shouldRender(node) ? 'flex' : 'none'"
